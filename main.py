@@ -7,6 +7,9 @@ import pymongo
 import tellurium
 import dnspython
 
+#Other Packages
+from zipfile import ZipFile
+
 import sys
 sys.path.insert(1, "/home/runner/MongoDB-Web-App/oscillatorDB")
 import mongoMethods as mm
@@ -38,15 +41,20 @@ def index():
     model_IDS = mm.get_ids(query)
 
     for ID in model_IDS:
-      ant = mm.get_antimony({ "ID" : ID })
+      antimony = mm.get_antimony({ "ID" : ID })
+
 
 
     return render_template('index.html')
 
 
-def download():
-  modelnum = 1
-  download = open("model" + modelnum + ".txt", "w+")
+def saveToTextFile(filename, antimony_model):
+  with open(filename, "w") as text_file:
+    text_file.write(antimony_model)
+
+def createZipFile(zipfilename, file):
+  with ZipFile(zipfilename, "w") as zipFile:
+    zipFile.write(file)
 
 
 if __name__ == "__main__":
