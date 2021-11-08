@@ -13,18 +13,24 @@ import os
 
 mm.startup()
 
-def saveToTextFile(filename, antimony_model):
-  with open(filename, "w") as text_file:
-    text_file.write(antimony_model)
+# def saveToTextFile(filename, antimony_model):
+#   with open(filename, "w") as text_file:
+#     text_file.write(antimony_model)
 
-def createZipFile(zipfilename):
-  ZipFile(zipfilename, "w")
+# def createZipFile(zipfilename):
+#   ZipFile(zipfilename, "w")
 
-def addToZipFile(zipfilename, file):
-  with ZipFile(zipfilename, "a") as zip_file:
-    zip_file.write(file)
-  os.remove(file)
+# def addToZipFile(zipfilename, file):
+#   with ZipFile(zipfilename, "a") as zip_file:
+#     zip_file.write(file)
+#   os.remove(file)
 
+def createToZipFile(zipfilename, filename, antimony_model):
+  subdir = "downloads"
+  filepath = os.path.join(subdir, zipfilename)
+
+  with ZipFile(filepath, "a") as zip_file:
+    zip_file.writestr(filename, antimony_model)
 
 
 num_nodes = 3
@@ -48,11 +54,16 @@ query = { "num_nodes" : 3, "num_reactions" : 5, "oscillator" : True } #set mass_
 #for some reaon removing mass_conserved parameter from query increases the number of IDS from 1 to 5
 model_IDS = mm.get_ids(query)
 
-createZipFile("download.zip")
+#createZipFile("download.zip")
 
-for ID in model_IDS:
-  ant = mm.get_antimony({ "ID" : ID })
-  filename = str(ID) + ".txt"
-  saveToTextFile(filename, ant)
-  addToZipFile("download.zip", filename)
+if model_IDS:
+  for ID in model_IDS:
+    ant = mm.get_antimony({ "ID" : ID })
+    filename = str(ID) + ".txt"
+    createToZipFile("download.zip", filename, ant)
+    # saveToTextFile(filename, ant)
+    # addToZipFile("download.zip", filename)
+else:
+  print("No entries found.")
+
 

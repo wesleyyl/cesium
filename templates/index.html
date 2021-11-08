@@ -1,24 +1,27 @@
-<!-- num_nodes, num_reactions, oscillator, mass_conserved -->
+<!-- form that gets the num_nodes, num_reactions, oscillator, mass_conserved -->
 
-<form>
-	<label for="num_nodes">Number of Nodes:</label>
-	<input type="text" id="num_nodes" name="num_nodes"><br><br>
-	<label for="num_reactions">Number of Reactions:</label>
-	<input type="text" id="num_reactions" name="num_reactions"><br><br>
-	<label for="oscillator">Does the model oscillate?</label>
-	<select id="oscillator" name="oscillator">
-		<option value="osc_yes">Yes</option>
-		<option value="osc_no">No</option>
-	</select><br><br>
-	<label for="mass_conserved">Is mass conserved?</label>
-	<select id="mass_conserved" name="mass_conserved">
-		<option value="conserved_yes">Yes</option>
-		<option value="mass_no">No</option>
-	</select><br><br>
-	<input type="submit" value="Download Models">
-</form>
+<!doctype html>
+	<title>Oscillator Database Download</title>
+	<h2>Oscillator Database Parameters:</h2>
 
-+ ant
+
+	<form>
+		<label for="num_nodes">Number of Nodes:</label>
+		<input type="text" id="num_nodes" name="num_nodes"><br><br>
+		<label for="num_reactions">Number of Reactions:</label>
+		<input type="text" id="num_reactions" name="num_reactions"><br><br>
+		<label for="oscillator">Does the model oscillate?</label>
+		<select id="oscillator" name="oscillator">
+			<option value="osc_yes">Yes</option>
+			<option value="osc_no">No</option>
+		</select><br><br>
+		<label for="mass_conserved">Is mass conserved?</label>
+		<select id="mass_conserved" name="mass_conserved">
+			<option value="conserved_yes">Yes</option>
+			<option value="conserved_no">No</option>
+		</select><br><br>
+		<input type="submit" value="Download Models">
+	</form>
 
 
 
