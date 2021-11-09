@@ -1,5 +1,5 @@
 #Flask
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from flask import Response
 
 #mongoMethods Dependencies
@@ -13,9 +13,9 @@ from zipfile import ZipFile
 import os
 
 #Initializing Flask app and mongoMethods Startup
-app = Flask(__name__)
+app = Flask(__name__, static_folder = 'download')
 mm.startup()
-
+app.config["FILENAME"] = "download.zip"
 
 
 #Index Page
@@ -26,29 +26,67 @@ def index():
     oscillator = request.args.get("oscillator", "")
     mass_conserved = request.args.get("mass_conserved", "")
 
-    oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved)
+    result = oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved)
 
-    return render_template('index.html')
+    if result == "Done":
+      return redirect('/download/' + app.config["FILENAME"])
+    elif result == "No entries found":
+      return render_template('index.html', value=result)
+    else:
+      return render_template('index.html', value="")
 
+    #return render_template('index.html')
 
 
 
 @app.route("/download/<path:filename>", methods = ['GET'])
 def download_zipfile(filename):
-  # return render_template('download.html', value=filename)
+  return render_template('download.html', value=filename)
   # if '/' in filename or '\\' in filename:
     # abort(404)
-  return send_from_directory("downloads", filename, as_attachment=True)
+  #return send_from_directory(app.static_folder, filename, as_attachment=True)
+
+@app.route("/return-files/<filename>")
+def return_files(filename):
+  file_path = app.static_folder + filename
+  try:
+    return send_from_directory(file_path, filename, as_attachment=True)
+    #return send_file(file_path, as_attachment=True, attachment_filename="")
+  except FileNotFound:
+    abort(404)
+
+"""
+Replace with single endpoint
+
+@app.route("/download/<path:filename>", methods = ['GET'])
+def download_zipfile(filename):
+  file_path = app.static_folder + filename
+  try:
+    return send_from_directory(file_path, filename, as_attachment=True)
+    #return send_file(file_path, as_attachment=True, attachment_filename="")
+  except FileNotFound:
+    abort(404)
 
 
+#Line 32:
+  return redirect('/download/' + app.config["FILENAME"])
 
+"""
+
+
+@app.route("/delete-files/<filename>")
+def remove_zipfile(filename):
+  try:
+    os.remove(os.path.join(app.static_folder, app.config["FILENAME"]))
+  except Exception as error:
+    pass
 
 #Function to process parameters and create download.zip
 def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
 
   def createToZipFile(zipfilename, filename, antimony_model):
-    subdir = "downloads"
-    filepath = os.path.join(subdir, zipfilename)
+    #subdir = "download"
+    filepath = os.path.join(app.static_folder, zipfilename)
 
     with ZipFile(filepath, "a") as zip_file:
       zip_file.writestr(filename, antimony_model)
@@ -76,9 +114,11 @@ def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
       for ID in model_IDS:
         ant = mm.get_antimony({ "ID" : ID })
         filename = str(ID) + ".txt"
-        createToZipFile("download.zip", filename, ant)
+        createToZipFile(app.config["FILENAME"], filename, ant)
+      return "Done"
     else:
-      print("No entries found.")
+      return "No entries found"
+
   except ValueError:
     return "Invalid Input"
 
