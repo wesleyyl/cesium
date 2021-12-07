@@ -41,7 +41,7 @@ prompt-toolkit==3.0.22
 py==1.11.0
 Pygments==2.10.0
 pymongo==3.12.0
-pyparsing==3.0.4
+pyparsing==2.2.1
 pytest==6.2.5
 python-dateutil==2.8.2
 python-libcombine==0.2.13
