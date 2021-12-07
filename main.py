@@ -1,5 +1,5 @@
 #Flask
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_from_directory
 from flask import Response
 
 #mongoMethods Dependencies
@@ -50,35 +50,38 @@ def index():
 
     result = oscillatorDB(num_nodes, num_reactions, oscillator_status, conserved)
 
-    if result == "Done":
-      return redirect('/download/' + app.config["FILENAME"])
+    if result[0] == "Done":
+      return render_template('download.html', value=result[1])
+      #return redirect('/download/' + app.config["FILENAME"])
     elif result == "No entries found":
-      return render_template('index.html', value=result)
+      return render_template('index.html', value=result[0])
     else:
       return render_template('index.html', value="")
-
     #return render_template('index.html')
 
 #FIND A WAY TO DELETE THE FILE AFTER DOWNLOADING IT!!
 
 
+"""
 @app.route("/download/<path:filename>", methods = ['GET'])
 def download_zipfile(filename):
   return render_template('download.html', value=filename)
+"""
+
   # if '/' in filename or '\\' in filename:
     # abort(404)
   #return send_from_directory(app.static_folder, filename, as_attachment=True)
 
 
-@app.route("/return-files/<filename>")
-def return_files(filename):
-  file_path = app.static_folder + filename
+@app.route("/download/<filename>")
+def download_file(filename):
+  #filepath = os.path.join(app.static_folder, app.config["FILENAME"])
+  #filepath = app.static_folder
   try:
-    return send_from_directory(file_path, filename, as_attachment=True)
+    return send_from_directory(app.static_folder, filename, as_attachment=True)
     #return send_file(file_path, as_attachment=True, attachment_filename="")
-  except FileNotFound:
+  except FileNotFoundError:
     abort(404)
-
 
 """
 Replace with single endpoint
@@ -114,14 +117,15 @@ def download_zipfile(filename):
 def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
 
   filepath = os.path.join(app.static_folder, app.config["FILENAME"])
+  if os.path.exists(filepath):
+    os.remove(filepath)
 
   def createToZipFile(zipfilename, filename, antimony_model): #simplify by removing zipfilename parameter
     #filepath = os.path.join(app.static_folder, zipfilename)
     with ZipFile(filepath, "a") as zip_file:
       zip_file.writestr(filename, antimony_model)
 
-  if os.path.exists(filepath):
-    os.remove(filepath)
+  
 
   try:
     if mass_conserved == -1:
@@ -138,13 +142,13 @@ def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
       for ID in model_IDS:
         ant = mm.get_antimony({ "ID" : ID })
         filename = str(ID) + ".txt"
-        createToZipFile(app.config["FILENAME"], filename, ant) #can simplify by removing firs parameter
-      return "Done"
+        createToZipFile(app.config["FILENAME"], filename, ant) #can simplify by removing first parameter
+      return ["Done", app.config["FILENAME"]]
     else:
-      return "No entries found"
+      return ["No entries found"]
 
   except ValueError:
-    return "Invalid Input"
+    return ["Invalid Input"]
 
 #Flask Development Server
 if __name__ == "__main__":

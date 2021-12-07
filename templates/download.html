@@ -3,6 +3,8 @@
   <h1>Download File</h1>
   <body class="body">
      <div class="container" align="left">
-      <a href="/download/{{value}}" target="blank"><button class='btn btn-default'>Download</button></a>
+      <a href="{{ url_for('download_file', filename=value) }}" target="blank"><button class='btn btn-default'>Download Zip File</button></a>
+      <br><br>
+      <a href="/" target="blank"><button class='btn btn-default'>Download Another File</button></a>
      </div>
   </body>
