@@ -25,34 +25,41 @@ mm.startup()
 #     zip_file.write(file)
 #   os.remove(file)
 
+# def createToZipFile(zipfilename, filename, antimony_model):
+#   subdir = "download"
+#   filepath = os.path.join(subdir, zipfilename)
+
+#   with ZipFile(filepath, "a") as zip_file:
+#     zip_file.writestr(filename, antimony_model)
+
 def createToZipFile(zipfilename, filename, antimony_model):
-  subdir = "download"
-  filepath = os.path.join(subdir, zipfilename)
+    filepath = os.path.join("download", zipfilename)
+    with ZipFile(filepath, "a") as zip_file:
+      zip_file.writestr(filename, antimony_model)
 
-  with ZipFile(filepath, "a") as zip_file:
-    zip_file.writestr(filename, antimony_model)
+# num_nodes = 2
+# num_reactions = 3
+# oscillator = "osc_yes"
+# mass_conserved = "conserved_no"
 
+# if oscillator == "osc_yes":
+#   oscillator_status = True
+# elif oscillator == "osc_no":
+#   oscillator_status = False
 
-num_nodes = 2
-num_reactions = 3
-oscillator = "osc_yes"
-mass_conserved = "conserved_no"
-
-if oscillator == "osc_yes":
-  oscillator_status = True
-elif oscillator == "osc_no":
-  oscillator_status = False
-
-if mass_conserved == "conserved_yes":
-  conserved = True
-elif mass_conserved == "conserved_no":
-  conserved = False
+# if mass_conserved == "conserved_yes":
+#   conserved = True
+# elif mass_conserved == "conserved_no":
+#   conserved = False
 
 
-query = { "num_nodes" : int(num_nodes), "num_reactions" : int(num_reactions), "oscillator" : oscillator_status, "mass_conserved" : conserved }
+#query = { "num_nodes" : int(num_nodes), "num_reactions" : int(num_reactions), "oscillator" : oscillator_status, "mass_conserved" : conserved }
 #query = { "num_nodes" : 3, "num_reactions" : 5, "oscillator" : True } #set mass_conserved to false, otherwise no entries found and model_IDS becomes a NoneType
+query = { "num_nodes" : 3, "num_reactions" : 5, "oscillator" : True, "mass_conserved" : False }
 #for some reaon removing mass_conserved parameter from query increases the number of IDS from 1 to 5
 model_IDS = mm.get_ids(query)
+
+#print(model_IDS)
 
 #createZipFile("download.zip")
 

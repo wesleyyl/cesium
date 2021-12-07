@@ -26,7 +26,29 @@ def index():
     oscillator = request.args.get("oscillator", "")
     mass_conserved = request.args.get("mass_conserved", "")
 
-    result = oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved)
+    try:
+      num_nodes = int(num_nodes)
+      num_reactions = int(num_reactions)
+    except ValueError:
+      pass
+
+    if oscillator == "osc_yes":
+      oscillator_status = True
+    elif oscillator == "osc_no":
+      oscillator_status = False
+    else:
+      oscillator_status = -1; #default value when website first loaded
+
+    if mass_conserved == "conserved_yes":
+      conserved = True
+    elif mass_conserved == "conserved_no":
+      conserved = False
+    elif mass_conserved == "conserved_NA":
+      conserved = -1
+    else:
+      conserved = -1; #default value when website first loaded
+
+    result = oscillatorDB(num_nodes, num_reactions, oscillator_status, conserved)
 
     if result == "Done":
       return redirect('/download/' + app.config["FILENAME"])
@@ -37,6 +59,7 @@ def index():
 
     #return render_template('index.html')
 
+#FIND A WAY TO DELETE THE FILE AFTER DOWNLOADING IT!!
 
 
 @app.route("/download/<path:filename>", methods = ['GET'])
@@ -46,6 +69,7 @@ def download_zipfile(filename):
     # abort(404)
   #return send_from_directory(app.static_folder, filename, as_attachment=True)
 
+
 @app.route("/return-files/<filename>")
 def return_files(filename):
   file_path = app.static_folder + filename
@@ -54,6 +78,7 @@ def return_files(filename):
     #return send_file(file_path, as_attachment=True, attachment_filename="")
   except FileNotFound:
     abort(404)
+
 
 """
 Replace with single endpoint
@@ -74,81 +99,52 @@ def download_zipfile(filename):
 """
 
 
-@app.route("/delete-files/<filename>")
-def remove_zipfile(filename):
-  try:
-    os.remove(os.path.join(app.static_folder, app.config["FILENAME"]))
-  except Exception as error:
-    pass
+# @app.route("/delete-files/<filename>")
+# def remove_zipfile(filename):
+#   try:
+#     os.remove(os.path.join(app.static_folder, app.config["FILENAME"]))
+#   except Exception as error:
+#     pass
+
+
+
+
 
 #Function to process parameters and create download.zip
 def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
 
-  def createToZipFile(zipfilename, filename, antimony_model):
-    #subdir = "download"
-    filepath = os.path.join(app.static_folder, zipfilename)
+  filepath = os.path.join(app.static_folder, app.config["FILENAME"])
 
+  def createToZipFile(zipfilename, filename, antimony_model): #simplify by removing zipfilename parameter
+    #filepath = os.path.join(app.static_folder, zipfilename)
     with ZipFile(filepath, "a") as zip_file:
       zip_file.writestr(filename, antimony_model)
 
+  if os.path.exists(filepath):
+    os.remove(filepath)
+
   try:
-    num_nodes = int(num_nodes)
-    num_reactions = int(num_reactions)
-
-    if oscillator == "osc_yes":
-      oscillator_status = True
-    elif oscillator == "osc_no":
-      oscillator_status = False
-
-    if mass_conserved == "conserved_yes":
-      conserved = True
-    elif mass_conserved == "conserved_no":
-      conserved = False
-
-    query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator_status, "mass_conserved" : conserved }
+    if mass_conserved == -1:
+      query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator }
+    else:
+      query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator, "mass_conserved" : mass_conserved }
+    #query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator, "mass_conserved" : mass_conserved }
     model_IDS = mm.get_ids(query)
 
-    # createZipFile("download.zip")
 
+
+    # createZipFile("download.zip")
     if model_IDS:
       for ID in model_IDS:
         ant = mm.get_antimony({ "ID" : ID })
         filename = str(ID) + ".txt"
-        createToZipFile(app.config["FILENAME"], filename, ant)
+        createToZipFile(app.config["FILENAME"], filename, ant) #can simplify by removing firs parameter
       return "Done"
     else:
       return "No entries found"
 
   except ValueError:
     return "Invalid Input"
-
-
-
-  #Functions to create text files and save to zip file
-  # def saveToTextFile(filename, antimony_model):
-
-  #   subdir = "downloads"
-  #   filepath = os.path.join(subdir, filename)
-
-  #   with open(filepath, "w") as text_file:
-  #     text_file.write(antimony_model)
-
-  # def createZipFile(zipfilename):
-
-  #   subdir = "downloads"
-  #   filepath = os.path.join(subdir, zipfilename)
-
-  #   ZipFile(filepath, "w")
-
-  # def addToZipFile(zipfilename, file):
-
-  #   subdir = "downloads"
-  #   filepath = os.path.join(subdir, file)
-
-  #   with ZipFile(filepath, "a") as zip_file:
-  #     zip_file.write(file)
-  #   os.remove(file)
-
 
 #Flask Development Server
 if __name__ == "__main__":
