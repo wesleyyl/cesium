@@ -243,11 +243,7 @@ def legline(off, scl):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyline
-    numpy.polynomial.chebyshev.chebline
-    numpy.polynomial.laguerre.lagline
-    numpy.polynomial.hermite.hermline
-    numpy.polynomial.hermite_e.hermeline
+    polyline, chebline
 
     Examples
     --------
@@ -300,11 +296,7 @@ def legfromroots(roots):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyfromroots
-    numpy.polynomial.chebyshev.chebfromroots
-    numpy.polynomial.laguerre.lagfromroots
-    numpy.polynomial.hermite.hermfromroots
-    numpy.polynomial.hermite_e.hermefromroots
+    polyfromroots, chebfromroots, lagfromroots, hermfromroots, hermefromroots
 
     Examples
     --------
@@ -605,6 +597,9 @@ def legpow(c, pow, maxpower=16):
     --------
     legadd, legsub, legmulx, legmul, legdiv
 
+    Examples
+    --------
+
     """
     return pu._pow(legmul, c, pow, maxpower)
 
@@ -886,6 +881,9 @@ def legval(x, c, tensor=True):
     Notes
     -----
     The evaluation uses Clenshaw recursion, aka synthetic division.
+
+    Examples
+    --------
 
     """
     c = np.array(c, ndmin=1, copy=False)
@@ -1322,7 +1320,7 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
         information from the singular value decomposition is also returned.
     w : array_like, shape (`M`,), optional
         Weights. If not None, the contribution of each point
-        ``(x[i],y[i])`` to the fit is weighted by ``w[i]``. Ideally the
+        ``(x[i],y[i])`` to the fit is weighted by `w[i]`. Ideally the
         weights are chosen so that the errors of the products ``w[i]*y[i]``
         all have the same variance.  The default value is None.
 
@@ -1345,7 +1343,7 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
         sv -- singular values of the scaled Vandermonde matrix
         rcond -- value of `rcond`.
 
-        For more details, see `numpy.linalg.lstsq`.
+        For more details, see `linalg.lstsq`.
 
     Warns
     -----
@@ -1359,15 +1357,11 @@ def legfit(x, y, deg, rcond=None, full=False, w=None):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyfit
-    numpy.polynomial.chebyshev.chebfit
-    numpy.polynomial.laguerre.lagfit
-    numpy.polynomial.hermite.hermfit
-    numpy.polynomial.hermite_e.hermefit
+    chebfit, polyfit, lagfit, hermfit, hermefit
     legval : Evaluates a Legendre series.
     legvander : Vandermonde matrix of Legendre series.
     legweight : Legendre weight function (= 1).
-    numpy.linalg.lstsq : Computes a least-squares fit from the matrix.
+    linalg.lstsq : Computes a least-squares fit from the matrix.
     scipy.interpolate.UnivariateSpline : Computes spline fits.
 
     Notes
@@ -1476,11 +1470,7 @@ def legroots(c):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyroots
-    numpy.polynomial.chebyshev.chebroots
-    numpy.polynomial.laguerre.lagroots
-    numpy.polynomial.hermite.hermroots
-    numpy.polynomial.hermite_e.hermeroots
+    polyroots, chebroots, lagroots, hermroots, hermeroots
 
     Notes
     -----
@@ -1652,6 +1642,7 @@ class Legendre(ABCPolyBase):
     _fromroots = staticmethod(legfromroots)
 
     # Virtual properties
+    nickname = 'leg'
     domain = np.array(legdomain)
     window = np.array(legdomain)
     basis_name = 'P'

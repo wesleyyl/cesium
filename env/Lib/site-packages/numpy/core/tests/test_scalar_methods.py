@@ -89,8 +89,7 @@ class TestAsIntegerRatio:
     ])
     def test_roundtrip(self, ftype, frac_vals, exp_vals):
         for frac, exp in zip(frac_vals, exp_vals):
-            f = np.ldexp(ftype(frac), exp)
-            assert f.dtype == ftype
+            f = np.ldexp(frac, exp, dtype=ftype)
             n, d = f.as_integer_ratio()
 
             try:

@@ -85,7 +85,7 @@ class LinalgCase:
         do(self.a, self.b, tags=self.tags)
 
     def __repr__(self):
-        return f'<LinalgCase: {self.name}>'
+        return "<LinalgCase: %s>" % (self.name,)
 
 
 def apply_tag(tag, cases):
@@ -348,10 +348,10 @@ class LinalgTestCase:
 
             try:
                 case.check(self.do)
-            except Exception as e:
-                msg = f'In test case: {case!r}\n\n'
+            except Exception:
+                msg = "In test case: %r\n\n" % case
                 msg += traceback.format_exc()
-                raise AssertionError(msg) from e
+                raise AssertionError(msg)
 
 
 class LinalgSquareTestCase(LinalgTestCase):
@@ -684,7 +684,7 @@ class SVDHermitianCases(HermitianTestCase, HermitianGeneralizedTestCase):
             axes = list(range(mat.ndim))
             axes[-1], axes[-2] = axes[-2], axes[-1]
             return np.conj(np.transpose(mat, axes=axes))
-
+        
         assert_almost_equal(np.matmul(u, hermitian(u)), np.broadcast_to(np.eye(u.shape[-1]), u.shape))
         assert_almost_equal(np.matmul(vt, hermitian(vt)), np.broadcast_to(np.eye(vt.shape[-1]), vt.shape))
         assert_equal(np.sort(s)[..., ::-1], s)
@@ -766,9 +766,6 @@ class TestCond(CondCases):
         for A, p in itertools.product(As, p_neg):
             linalg.cond(A, p)
 
-    @pytest.mark.xfail(True, run=False,
-                       reason="Platform/LAPACK-dependent failure, "
-                              "see gh-18914")
     def test_nan(self):
         # nans should be passed through, not converted to infs
         ps = [None, 1, -1, 2, -2, 'fro']
@@ -984,7 +981,7 @@ class TestLstsq(LstsqCases):
             linalg.lstsq(A, y, rcond=None)
 
 
-@pytest.mark.parametrize('dt', [np.dtype(c) for c in '?bBhHiIqQefdgFDGO'])
+@pytest.mark.parametrize('dt', [np.dtype(c) for c in '?bBhHiIqQefdgFDGO']) 
 class TestMatrixPower:
 
     rshft_0 = np.eye(4)
@@ -1013,7 +1010,7 @@ class TestMatrixPower:
             mz = matrix_power(M, 0)
             assert_equal(mz, identity_like_generalized(M))
             assert_equal(mz.dtype, M.dtype)
-
+        
         for mat in self.rshft_all:
             tz(mat.astype(dt))
             if dt != object:
@@ -1735,7 +1732,7 @@ class TestCholesky:
 
             b = np.matmul(c, c.transpose(t).conj())
             assert_allclose(b, a,
-                            err_msg=f'{shape} {dtype}\n{a}\n{c}',
+                            err_msg="{} {}\n{}\n{}".format(shape, dtype, a, c),
                             atol=500 * a.shape[0] * np.finfo(dtype).eps)
 
     def test_0_size(self):

@@ -4,7 +4,7 @@
 ============================
 
 See Also
---------
+---------
 load_library : Load a C library.
 ndpointer : Array restype/argtype with verification.
 as_ctypes : Create a ctypes array from an ndarray.
@@ -49,12 +49,12 @@ Then, we're ready to call ``foo_func``:
 >>> _lib.foo_func(out, len(out))                #doctest: +SKIP
 
 """
-__all__ = ['load_library', 'ndpointer', 'c_intp', 'as_ctypes', 'as_array',
-           'as_ctypes_type']
+__all__ = ['load_library', 'ndpointer', 'ctypes_load_library',
+           'c_intp', 'as_ctypes', 'as_array']
 
 import os
 from numpy import (
-    integer, ndarray, dtype as _dtype, asarray, frombuffer
+    integer, ndarray, dtype as _dtype, deprecate, array, frombuffer
 )
 from numpy.core.multiarray import _flagdict, flagsobj
 
@@ -75,6 +75,7 @@ if ctypes is None:
 
         """
         raise ImportError("ctypes is not available.")
+    ctypes_load_library = _dummy
     load_library = _dummy
     as_ctypes = _dummy
     as_array = _dummy
@@ -153,6 +154,8 @@ else:
         ## if no successful return in the libname_ext loop:
         raise OSError("no file with expected extension")
 
+    ctypes_load_library = deprecate(load_library, 'ctypes_load_library',
+                                    'load_library')
 
 def _num_fromflags(flaglist):
     num = 0
@@ -294,8 +297,8 @@ def ndpointer(dtype=None, ndim=None, shape=None, flags=None):
         if num is None:
             try:
                 flags = [x.strip().upper() for x in flags]
-            except Exception as e:
-                raise TypeError("invalid flags specification") from e
+            except Exception:
+                raise TypeError("invalid flags specification")
             num = _num_fromflags(flags)
 
     # normalize shape to an Optional[tuple]
@@ -374,10 +377,10 @@ if ctypes is not None:
         dtype_native = dtype.newbyteorder('=')
         try:
             ctype = _scalar_type_map[dtype_native]
-        except KeyError as e:
+        except KeyError:
             raise NotImplementedError(
                 "Converting {!r} to a ctypes type".format(dtype)
-            ) from None
+            )
 
         if dtype_with_endian.byteorder == '>':
             ctype = ctype.__ctype_be__
@@ -515,7 +518,7 @@ if ctypes is not None:
             p_arr_type = ctypes.POINTER(_ctype_ndarray(obj._type_, shape))
             obj = ctypes.cast(obj, p_arr_type).contents
 
-        return asarray(obj)
+        return array(obj, copy=False)
 
 
     def as_ctypes(obj):

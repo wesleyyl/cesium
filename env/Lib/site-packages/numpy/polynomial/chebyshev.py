@@ -104,7 +104,7 @@ References
 ----------
 .. [1] A. T. Benjamin, et al., "Combinatorial Trigonometry with Chebyshev
   Polynomials," *Journal of Statistical Planning and Inference 14*, 2008
-  (https://web.archive.org/web/20080221202153/https://www.math.hmc.edu/~benjamin/papers/CombTrig.pdf, pg. 4)
+  (preprint: https://www.math.hmc.edu/~benjamin/papers/CombTrig.pdf, pg. 4)
 
 """
 import numpy as np
@@ -477,6 +477,8 @@ def chebline(off, scl):
     """
     Chebyshev series whose graph is a straight line.
 
+
+
     Parameters
     ----------
     off, scl : scalars
@@ -490,11 +492,7 @@ def chebline(off, scl):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyline
-    numpy.polynomial.legendre.legline
-    numpy.polynomial.laguerre.lagline
-    numpy.polynomial.hermite.hermline
-    numpy.polynomial.hermite_e.hermeline
+    polyline
 
     Examples
     --------
@@ -547,11 +545,7 @@ def chebfromroots(roots):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyfromroots
-    numpy.polynomial.legendre.legfromroots
-    numpy.polynomial.laguerre.lagfromroots
-    numpy.polynomial.hermite.hermfromroots
-    numpy.polynomial.hermite_e.hermefromroots
+    polyfromroots, legfromroots, lagfromroots, hermfromroots, hermefromroots
 
     Examples
     --------
@@ -770,7 +764,7 @@ def chebdiv(c1, c2):
 
     See Also
     --------
-    chebadd, chebsub, chebmulx, chebmul, chebpow
+    chebadd, chebsub, chemulx, chebmul, chebpow
 
     Notes
     -----
@@ -1148,6 +1142,9 @@ def chebval(x, c, tensor=True):
     Notes
     -----
     The evaluation uses Clenshaw recursion, aka synthetic division.
+
+    Examples
+    --------
 
     """
     c = np.array(c, ndmin=1, copy=True)
@@ -1583,7 +1580,7 @@ def chebfit(x, y, deg, rcond=None, full=False, w=None):
         information from the singular value decomposition is also returned.
     w : array_like, shape (`M`,), optional
         Weights. If not None, the contribution of each point
-        ``(x[i],y[i])`` to the fit is weighted by ``w[i]``. Ideally the
+        ``(x[i],y[i])`` to the fit is weighted by `w[i]`. Ideally the
         weights are chosen so that the errors of the products ``w[i]*y[i]``
         all have the same variance.  The default value is None.
 
@@ -1604,7 +1601,7 @@ def chebfit(x, y, deg, rcond=None, full=False, w=None):
         sv -- singular values of the scaled Vandermonde matrix
         rcond -- value of `rcond`.
 
-        For more details, see `numpy.linalg.lstsq`.
+        For more details, see `linalg.lstsq`.
 
     Warns
     -----
@@ -1618,15 +1615,11 @@ def chebfit(x, y, deg, rcond=None, full=False, w=None):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyfit
-    numpy.polynomial.legendre.legfit
-    numpy.polynomial.laguerre.lagfit
-    numpy.polynomial.hermite.hermfit
-    numpy.polynomial.hermite_e.hermefit
+    polyfit, legfit, lagfit, hermfit, hermefit
     chebval : Evaluates a Chebyshev series.
     chebvander : Vandermonde matrix of Chebyshev series.
     chebweight : Chebyshev weight function.
-    numpy.linalg.lstsq : Computes a least-squares fit from the matrix.
+    linalg.lstsq : Computes a least-squares fit from the matrix.
     scipy.interpolate.UnivariateSpline : Computes spline fits.
 
     Notes
@@ -1736,11 +1729,7 @@ def chebroots(c):
 
     See Also
     --------
-    numpy.polynomial.polynomial.polyroots
-    numpy.polynomial.legendre.legroots
-    numpy.polynomial.laguerre.lagroots
-    numpy.polynomial.hermite.hermroots
-    numpy.polynomial.hermite_e.hermeroots
+    polyroots, legroots, lagroots, hermroots, hermeroots
 
     Notes
     -----
@@ -1949,8 +1938,8 @@ def chebpts1(npts):
     if _npts < 1:
         raise ValueError("npts must be >= 1")
 
-    x = 0.5 * np.pi / _npts * np.arange(-_npts+1, _npts+1, 2)
-    return np.sin(x)
+    x = np.linspace(-np.pi, 0, _npts, endpoint=False) + np.pi/(2*_npts)
+    return np.cos(x)
 
 
 def chebpts2(npts):
@@ -2069,6 +2058,7 @@ class Chebyshev(ABCPolyBase):
         return cls(coef, domain=domain)
 
     # Virtual properties
+    nickname = 'cheb'
     domain = np.array(chebdomain)
     window = np.array(chebdomain)
     basis_name = 'T'

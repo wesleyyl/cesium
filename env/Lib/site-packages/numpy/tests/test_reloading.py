@@ -1,4 +1,4 @@
-from numpy.testing import assert_raises, assert_warns, assert_, assert_equal
+from numpy.testing import assert_raises, assert_, assert_equal
 from numpy.compat import pickle
 
 import sys
@@ -16,15 +16,13 @@ def test_numpy_reloading():
     VisibleDeprecationWarning = np.VisibleDeprecationWarning
     ModuleDeprecationWarning = np.ModuleDeprecationWarning
 
-    with assert_warns(UserWarning):
-        reload(np)
+    reload(np)
     assert_(_NoValue is np._NoValue)
     assert_(ModuleDeprecationWarning is np.ModuleDeprecationWarning)
     assert_(VisibleDeprecationWarning is np.VisibleDeprecationWarning)
 
     assert_raises(RuntimeError, reload, numpy._globals)
-    with assert_warns(UserWarning):
-        reload(np)
+    reload(np)
     assert_(_NoValue is np._NoValue)
     assert_(ModuleDeprecationWarning is np.ModuleDeprecationWarning)
     assert_(VisibleDeprecationWarning is np.VisibleDeprecationWarning)
@@ -47,15 +45,13 @@ def test_full_reimport():
     # This is generally unsafe, especially, since we also reload the C-modules.
     code = textwrap.dedent(r"""
         import sys
-        from pytest import warns
         import numpy as np
 
         for k in list(sys.modules.keys()):
             if "numpy" in k:
                 del sys.modules[k]
 
-        with warns(UserWarning):
-            import numpy as np
+        import numpy as np
         """)
     p = subprocess.run([sys.executable, '-c', code])
-
+    assert p.returncode == 0

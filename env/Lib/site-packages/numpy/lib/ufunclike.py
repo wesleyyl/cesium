@@ -100,7 +100,7 @@ def fix(x, out=None):
 
     See Also
     --------
-    rint, trunc, floor, ceil
+    trunc, floor, ceil
     around : Round to given number of decimals
 
     Examples
@@ -189,8 +189,7 @@ def isposinf(x, out=None):
     try:
         signbit = ~nx.signbit(x)
     except TypeError as e:
-        dtype = nx.asanyarray(x).dtype
-        raise TypeError(f'This operation is not supported for {dtype} values '
+        raise TypeError('This operation is not supported for complex values '
                         'because it would be ambiguous.') from e
     else:
         return nx.logical_and(is_inf, signbit, out)
@@ -261,8 +260,7 @@ def isneginf(x, out=None):
     try:
         signbit = nx.signbit(x)
     except TypeError as e:
-        dtype = nx.asanyarray(x).dtype
-        raise TypeError(f'This operation is not supported for {dtype} values '
+        raise TypeError('This operation is not supported for complex values '
                         'because it would be ambiguous.') from e
     else:
         return nx.logical_and(is_inf, signbit, out)

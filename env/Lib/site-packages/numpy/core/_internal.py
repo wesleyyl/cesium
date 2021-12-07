@@ -8,7 +8,6 @@ import ast
 import re
 import sys
 import platform
-import warnings
 
 from .multiarray import dtype, array, ndarray
 try:
@@ -18,25 +17,26 @@ except ImportError:
 
 IS_PYPY = platform.python_implementation() == 'PyPy'
 
-if sys.byteorder == 'little':
+if (sys.byteorder == 'little'):
     _nbo = '<'
 else:
     _nbo = '>'
 
 def _makenames_list(adict, align):
     allfields = []
-
-    for fname, obj in adict.items():
+    fnames = list(adict.keys())
+    for fname in fnames:
+        obj = adict[fname]
         n = len(obj)
-        if not isinstance(obj, tuple) or n not in (2, 3):
+        if not isinstance(obj, tuple) or n not in [2, 3]:
             raise ValueError("entry not a 2- or 3- tuple")
-        if n > 2 and obj[2] == fname:
+        if (n > 2) and (obj[2] == fname):
             continue
         num = int(obj[1])
-        if num < 0:
+        if (num < 0):
             raise ValueError("invalid offset.")
         format = dtype(obj[0], align=align)
-        if n > 2:
+        if (n > 2):
             title = obj[2]
         else:
             title = None
@@ -68,7 +68,7 @@ def _usefields(adict, align):
             res = adict[name]
             formats.append(res[0])
             offsets.append(res[1])
-            if len(res) > 2:
+            if (len(res) > 2):
                 titles.append(res[2])
             else:
                 titles.append(None)
@@ -108,7 +108,7 @@ def _array_descr(descriptor):
     for field in ordered_fields:
         if field[1] > offset:
             num = field[1] - offset
-            result.append(('', f'|V{num}'))
+            result.append(('', '|V%d' % num))
             offset += num
         elif field[1] < offset:
             raise ValueError(
@@ -128,7 +128,7 @@ def _array_descr(descriptor):
 
     if descriptor.itemsize > offset:
         num = descriptor.itemsize - offset
-        result.append(('', f'|V{num}'))
+        result.append(('', '|V%d' % num))
 
     return result
 
@@ -162,9 +162,8 @@ def _commastring(astr):
         try:
             (order1, repeats, order2, dtype) = mo.groups()
         except (TypeError, AttributeError):
-            raise ValueError(
-                f'format number {len(result)+1} of "{astr}" is not recognized'
-                ) from None
+            raise ValueError('format number %d of "%s" is not recognized' %
+                                            (len(result)+1, astr))
         startindex = mo.end()
         # Separator or ending padding
         if startindex < len(astr):
@@ -191,7 +190,7 @@ def _commastring(astr):
                     (order1, order2))
             order = order1
 
-        if order in ('|', '=', _nbo):
+        if order in ['|', '=', _nbo]:
             order = ''
         dtype = order + dtype
         if (repeats == ''):
@@ -223,7 +222,7 @@ def _getintp_ctype():
         val = dummy_ctype(np.intp)
     else:
         char = dtype('p').char
-        if char == 'i':
+        if (char == 'i'):
             val = ctypes.c_int
         elif char == 'l':
             val = ctypes.c_long
@@ -351,45 +350,11 @@ class _ctypes:
         """
         return self.data_as(ctypes.c_void_p)
 
-    # Numpy 1.21.0, 2021-05-18
-
-    def get_data(self):
-        """Deprecated getter for the `_ctypes.data` property.
-
-        .. deprecated:: 1.21
-        """
-        warnings.warn('"get_data" is deprecated. Use "data" instead',
-                      DeprecationWarning, stacklevel=2)
-        return self.data
-
-    def get_shape(self):
-        """Deprecated getter for the `_ctypes.shape` property.
-
-        .. deprecated:: 1.21
-        """
-        warnings.warn('"get_shape" is deprecated. Use "shape" instead',
-                      DeprecationWarning, stacklevel=2)
-        return self.shape
-
-    def get_strides(self):
-        """Deprecated getter for the `_ctypes.strides` property.
-
-        .. deprecated:: 1.21
-        """
-        warnings.warn('"get_strides" is deprecated. Use "strides" instead',
-                      DeprecationWarning, stacklevel=2)
-        return self.strides
-
-    def get_as_parameter(self):
-        """Deprecated getter for the `_ctypes._as_parameter_` property.
-
-        .. deprecated:: 1.21
-        """
-        warnings.warn(
-            '"get_as_parameter" is deprecated. Use "_as_parameter_" instead',
-            DeprecationWarning, stacklevel=2,
-        )
-        return self._as_parameter_
+    # kept for compatibility
+    get_data = data.fget
+    get_shape = shape.fget
+    get_strides = strides.fget
+    get_as_parameter = _as_parameter_.fget
 
 
 def _newnames(datatype, order):
@@ -408,12 +373,12 @@ def _newnames(datatype, order):
                 nameslist.remove(name)
             except ValueError:
                 if name in seen:
-                    raise ValueError(f"duplicate field name: {name}") from None
+                    raise ValueError("duplicate field name: %s" % (name,))
                 else:
-                    raise ValueError(f"unknown field name: {name}") from None
+                    raise ValueError("unknown field name: %s" % (name,))
             seen.add(name)
         return tuple(list(order) + nameslist)
-    raise ValueError(f"unsupported order value: {order}")
+    raise ValueError("unsupported order value: %s" % (order,))
 
 def _copy_fields(ary):
     """Return copy of structured array with padding between fields removed.
@@ -714,7 +679,8 @@ def __dtype_from_pep3118(stream, is_subdtype):
 
         if not (is_padding and name is None):
             if name is not None and name in field_spec['names']:
-                raise RuntimeError(f"Duplicate field name '{name}' in PEP3118 format")
+                raise RuntimeError("Duplicate field name '%s' in PEP3118 format"
+                                   % name)
             field_spec['names'].append(name)
             field_spec['formats'].append(value)
             field_spec['offsets'].append(offset)
@@ -750,7 +716,7 @@ def _fix_names(field_spec):
 
         j = 0
         while True:
-            name = f'f{j}'
+            name = 'f{}'.format(j)
             if name not in names:
                 break
             j = j + 1
@@ -823,7 +789,7 @@ def _ufunc_doc_signature_formatter(ufunc):
     if ufunc.nin == 1:
         in_args = 'x'
     else:
-        in_args = ', '.join(f'x{i+1}' for i in range(ufunc.nin))
+        in_args = ', '.join('x{}'.format(i+1) for i in range(ufunc.nin))
 
     # output arguments are both keyword or positional
     if ufunc.nout == 0:
@@ -843,13 +809,11 @@ def _ufunc_doc_signature_formatter(ufunc):
         ", order='K'"
         ", dtype=None"
         ", subok=True"
+        "[, signature"
+        ", extobj]"
     )
-
-    # NOTE: gufuncs may or may not support the `axis` parameter
     if ufunc.signature is None:
-        kwargs = f", where=True{kwargs}[, signature, extobj]"
-    else:
-        kwargs += "[, signature, extobj, axes, axis]"
+        kwargs = ", where=True" + kwargs
 
     # join all the parts together
     return '{name}({in_args}{out_args}, *{kwargs})'.format(

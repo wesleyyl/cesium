@@ -1,17 +1,28 @@
 """
 Set operations for arrays based on sorting.
 
-Notes
------
+:Contains:
+  unique,
+  isin,
+  ediff1d,
+  intersect1d,
+  setxor1d,
+  in1d,
+  union1d,
+  setdiff1d
+
+:Notes:
 
 For floating point arrays, inaccurate results may appear due to usual round-off
 and floating point comparison issues.
 
 Speed could be gained in some operations by an implementation of
-`numpy.sort`, that can provide directly the permutation vectors, thus avoiding
-calls to `numpy.argsort`.
+sort(), that can provide directly the permutation vectors, avoiding
+thus calls to argsort().
 
-Original author: Robert Cimrman
+To do: Optionally return indices analogously to unique for all functions.
+
+:Author: Robert Cimrman
 
 """
 import functools
@@ -93,7 +104,7 @@ def ediff1d(ary, to_end=None, to_begin=None):
     else:
         to_begin = np.asanyarray(to_begin)
         if not np.can_cast(to_begin, dtype_req, casting="same_kind"):
-            raise TypeError("dtype of `to_begin` must be compatible "
+            raise TypeError("dtype of `to_end` must be compatible "
                             "with input `ary` under the `same_kind` rule.")
 
         to_begin = to_begin.ravel()
@@ -195,7 +206,6 @@ def unique(ar, return_index=False, return_inverse=False,
     --------
     numpy.lib.arraysetops : Module with a number of other functions for
                             performing set operations on arrays.
-    repeat : Repeat elements of an array.
 
     Notes
     -----
@@ -208,16 +218,6 @@ def unique(ar, return_index=False, return_inverse=False,
     treated in the same way as any other 1-D array. The result is that the
     flattened subarrays are sorted in lexicographic order starting with the
     first element.
-
-    .. versionchanged: NumPy 1.21
-        If nan values are in the input array, a single nan is put
-        to the end of the sorted unique values.
-
-        Also for complex arrays all NaN values are considered equivalent
-        (no matter whether the NaN is in the real or imaginary part).
-        As the representant for the returned array the smallest one in the
-        lexicographical order is chosen - see np.sort for how the lexicographical
-        order is defined for complex arrays.
 
     Examples
     --------
@@ -244,7 +244,7 @@ def unique(ar, return_index=False, return_inverse=False,
     >>> a[indices]
     array(['a', 'b', 'c'], dtype='<U1')
 
-    Reconstruct the input array from the unique values and inverse:
+    Reconstruct the input array from the unique values:
 
     >>> a = np.array([1, 2, 6, 4, 2, 3, 2])
     >>> u, indices = np.unique(a, return_inverse=True)
@@ -254,17 +254,6 @@ def unique(ar, return_index=False, return_inverse=False,
     array([0, 1, 4, 3, 1, 2, 1])
     >>> u[indices]
     array([1, 2, 6, 4, 2, 3, 2])
-
-    Reconstruct the input values from the unique values and counts:
-
-    >>> a = np.array([1, 2, 6, 4, 2, 3, 2])
-    >>> values, counts = np.unique(a, return_counts=True)
-    >>> values
-    array([1, 2, 3, 4, 6])
-    >>> counts
-    array([1, 3, 1, 1, 1])
-    >>> np.repeat(values, counts)
-    array([1, 2, 2, 2, 3, 4, 6])    # original order not preserved
 
     """
     ar = np.asanyarray(ar)
@@ -277,7 +266,7 @@ def unique(ar, return_index=False, return_inverse=False,
         ar = np.moveaxis(ar, axis, 0)
     except np.AxisError:
         # this removes the "axis1" or "axis2" prefix from the error message
-        raise np.AxisError(axis, ar.ndim) from None
+        raise np.AxisError(axis, ar.ndim)
 
     # Must reshape to a contiguous 2D array for this to work...
     orig_shape, orig_dtype = ar.shape, ar.dtype
@@ -299,10 +288,10 @@ def unique(ar, return_index=False, return_inverse=False,
             # array with shape `(len(ar),)`.  Because `dtype` in this case has
             # itemsize 0, the total size of the result is still 0 bytes.
             consolidated = np.empty(len(ar), dtype=dtype)
-    except TypeError as e:
+    except TypeError:
         # There's no good way to do this for object arrays, etc...
         msg = 'The axis argument to unique is not supported for dtype {dt}'
-        raise TypeError(msg.format(dt=ar.dtype)) from e
+        raise TypeError(msg.format(dt=ar.dtype))
 
     def reshape_uniq(uniq):
         n = len(uniq)
@@ -334,18 +323,7 @@ def _unique1d(ar, return_index=False, return_inverse=False,
         aux = ar
     mask = np.empty(aux.shape, dtype=np.bool_)
     mask[:1] = True
-    if aux.shape[0] > 0 and aux.dtype.kind in "cfmM" and np.isnan(aux[-1]):
-        if aux.dtype.kind == "c":  # for complex all NaNs are considered equivalent
-            aux_firstnan = np.searchsorted(np.isnan(aux), True, side='left')
-        else:
-            aux_firstnan = np.searchsorted(aux, aux[-1], side='left')
-        if aux_firstnan > 0:
-            mask[1:aux_firstnan] = (
-                aux[1:aux_firstnan] != aux[:aux_firstnan - 1])
-        mask[aux_firstnan] = True
-        mask[aux_firstnan + 1:] = False
-    else:
-        mask[1:] = aux[1:] != aux[:-1]
+    mask[1:] = aux[1:] != aux[:-1]
 
     ret = (aux[mask],)
     if return_index:
@@ -379,9 +357,7 @@ def intersect1d(ar1, ar2, assume_unique=False, return_indices=False):
         Input arrays. Will be flattened if not already 1D.
     assume_unique : bool
         If True, the input arrays are both assumed to be unique, which
-        can speed up the calculation.  If True but ``ar1`` or ``ar2`` are not
-        unique, incorrect results and out-of-bounds indices could result.
-        Default is False.
+        can speed up the calculation.  Default is False.
     return_indices : bool
         If True, the indices which correspond to the intersection of the two
         arrays are returned. The first instance of a value is used if there are
@@ -585,10 +561,6 @@ def in1d(ar1, ar2, assume_unique=False, invert=False):
     # Ravel both arrays, behavior for the first array could be different
     ar1 = np.asarray(ar1).ravel()
     ar2 = np.asarray(ar2).ravel()
-
-    # Ensure that iteration through object arrays yields size-1 arrays
-    if ar2.dtype == object:
-        ar2 = ar2.reshape(-1, 1)
 
     # Check if one of the arrays may contain arbitrary objects
     contains_object = ar1.dtype.hasobject or ar2.dtype.hasobject

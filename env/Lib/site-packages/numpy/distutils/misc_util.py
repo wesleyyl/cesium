@@ -9,11 +9,13 @@ import subprocess
 import shutil
 import multiprocessing
 import textwrap
-import importlib.util
-from threading import local as tlocal
 
 import distutils
 from distutils.errors import DistutilsError
+try:
+    from threading import local as tlocal
+except ImportError:
+    from dummy_threading import local as tlocal
 
 # stores temporary directory of each thread to only create one per thread
 _tdata = tlocal()
@@ -425,9 +427,9 @@ def msvc_runtime_major():
 #########################
 
 #XXX need support for .C that is also C++
-cxx_ext_match = re.compile(r'.*\.(cpp|cxx|cc)\Z', re.I).match
-fortran_ext_match = re.compile(r'.*\.(f90|f95|f77|for|ftn|f)\Z', re.I).match
-f90_ext_match = re.compile(r'.*\.(f90|f95)\Z', re.I).match
+cxx_ext_match = re.compile(r'.*[.](cpp|cxx|cc)\Z', re.I).match
+fortran_ext_match = re.compile(r'.*[.](f90|f95|f77|for|ftn|f)\Z', re.I).match
+f90_ext_match = re.compile(r'.*[.](f90|f95)\Z', re.I).match
 f90_module_name_match = re.compile(r'\s*module\s*(?P<name>[\w_]+)', re.I).match
 def _get_f90_modules(source):
     """Return a list of Fortran f90 module names that
@@ -1898,16 +1900,15 @@ class Configuration:
                 revision0 = f.read().strip()
 
             branch_map = {}
-            with open(branch_cache_fn, 'r') as f:
-                for line in f:
-                    branch1, revision1  = line.split()[:2]
-                    if revision1==revision0:
-                        branch0 = branch1
-                    try:
-                        revision1 = int(revision1)
-                    except ValueError:
-                        continue
-                    branch_map[branch1] = revision1
+            for line in file(branch_cache_fn, 'r'):
+                branch1, revision1  = line.split()[:2]
+                if revision1==revision0:
+                    branch0 = branch1
+                try:
+                    revision1 = int(revision1)
+                except ValueError:
+                    continue
+                branch_map[branch1] = revision1
 
             return branch_map.get(branch0)
 
@@ -1965,13 +1966,6 @@ class Configuration:
                     version = getattr(version_module, a, None)
                     if version is not None:
                         break
-
-                # Try if versioneer module
-                try:
-                    version = version_module.get_versions()['version']
-                except AttributeError:
-                    pass
-
                 if version is not None:
                     break
 
@@ -2127,11 +2121,12 @@ def get_npy_pkg_dir():
     environment, and using them when cross-compiling.
 
     """
+    # XXX: import here for bootstrapping reasons
+    import numpy
     d = os.environ.get('NPY_PKG_CONFIG_PATH')
     if d is not None:
         return d
-    spec = importlib.util.find_spec('numpy')
-    d = os.path.join(os.path.dirname(spec.origin),
+    d = os.path.join(os.path.dirname(numpy.__file__),
             'core', 'lib', 'npy-pkg-config')
     return d
 
@@ -2357,14 +2352,9 @@ def generate_config_py(target):
                 * ``src_dirs``: directories containing library source files
                 * ``define_macros``: preprocessor macros used by
                   ``distutils.setup``
-                * ``baseline``: minimum CPU features required
-                * ``found``: dispatched features supported in the system
-                * ``not found``: dispatched features that are not supported
-                  in the system
 
                 Examples
                 --------
-                >>> import numpy as np
                 >>> np.show_config()
                 blas_opt_info:
                     language = c
@@ -2372,9 +2362,6 @@ def generate_config_py(target):
                     libraries = ['openblas', 'openblas']
                     library_dirs = ['/usr/local/lib']
                 """
-                from numpy.core._multiarray_umath import (
-                    __cpu_features__, __cpu_baseline__, __cpu_dispatch__
-                )
                 for name,info_dict in globals().items():
                     if name[0] == "_" or type(info_dict) is not type({}): continue
                     print(name + ":")
@@ -2385,19 +2372,6 @@ def generate_config_py(target):
                         if k == "sources" and len(v) > 200:
                             v = v[:60] + " ...\n... " + v[-60:]
                         print("    %s = %s" % (k,v))
-
-                features_found, features_not_found = [], []
-                for feature in __cpu_dispatch__:
-                    if __cpu_features__[feature]:
-                        features_found.append(feature)
-                    else:
-                        features_not_found.append(feature)
-
-                print("Supported SIMD extensions in this NumPy install:")
-                print("    baseline = %s" % (','.join(__cpu_baseline__)))
-                print("    found = %s" % (','.join(features_found)))
-                print("    not found = %s" % (','.join(features_not_found)))
-
                     '''))
 
     return target

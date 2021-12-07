@@ -4,8 +4,7 @@ import types
 import collections
 import itertools
 from functools import lru_cache
-from typing import List
-
+from typing import List, Union, Iterable
 
 _bslash = chr(92)
 
@@ -39,7 +38,7 @@ class __config_flags:
 
 
 @lru_cache(maxsize=128)
-def col(loc: int, strg: str):
+def col(loc: int, strg: str) -> int:
     """
     Returns current column within a string, counting newlines as line separators.
     The first column is number 1.
@@ -56,7 +55,7 @@ def col(loc: int, strg: str):
 
 
 @lru_cache(maxsize=128)
-def lineno(loc: int, strg: str):
+def lineno(loc: int, strg: str) -> int:
     """Returns current line number within a string, counting newlines as line separators.
     The first line is number 1.
 
@@ -70,13 +69,13 @@ def lineno(loc: int, strg: str):
 
 
 @lru_cache(maxsize=128)
-def line(loc: int, strg: str):
+def line(loc: int, strg: str) -> str:
     """
     Returns the line of text containing loc within a string, counting newlines as line separators.
     """
-    lastCR = strg.rfind("\n", 0, loc)
-    nextCR = strg.find("\n", loc)
-    return strg[lastCR + 1 : nextCR] if nextCR >= 0 else strg[lastCR + 1 :]
+    last_cr = strg.rfind("\n", 0, loc)
+    next_cr = strg.find("\n", loc)
+    return strg[last_cr + 1 : next_cr] if next_cr >= 0 else strg[last_cr + 1 :]
 
 
 class _UnboundedCache:
@@ -85,18 +84,18 @@ class _UnboundedCache:
         cache_get = cache.get
         self.not_in_cache = not_in_cache = object()
 
-        def get(self, key):
+        def get(_, key):
             return cache_get(key, not_in_cache)
 
-        def set(self, key, value):
+        def set_(_, key, value):
             cache[key] = value
 
-        def clear(self):
+        def clear(_):
             cache.clear()
 
         self.size = None
         self.get = types.MethodType(get, self)
-        self.set = types.MethodType(set, self)
+        self.set = types.MethodType(set_, self)
         self.clear = types.MethodType(clear, self)
 
 
@@ -106,20 +105,20 @@ class _FifoCache:
         cache = collections.OrderedDict()
         cache_get = cache.get
 
-        def get(self, key):
+        def get(_, key):
             return cache_get(key, not_in_cache)
 
-        def set(self, key, value):
+        def set_(_, key, value):
             cache[key] = value
             while len(cache) > size:
                 cache.popitem(last=False)
 
-        def clear(self):
+        def clear(_):
             cache.clear()
 
         self.size = size
         self.get = types.MethodType(get, self)
-        self.set = types.MethodType(set, self)
+        self.set = types.MethodType(set_, self)
         self.clear = types.MethodType(clear, self)
 
 
@@ -171,7 +170,7 @@ class UnboundedMemo(dict):
         pass
 
 
-def _escapeRegexRangeChars(s: str):
+def _escape_regex_range_chars(s: str) -> str:
     # escape these chars: ^-[]
     for c in r"\^-[]":
         s = s.replace(c, _bslash + c)
@@ -180,7 +179,9 @@ def _escapeRegexRangeChars(s: str):
     return str(s)
 
 
-def _collapseStringToRanges(s: str, re_escape: bool = True):
+def _collapse_string_to_ranges(
+    s: Union[str, Iterable[str]], re_escape: bool = True
+) -> str:
     def is_consecutive(c):
         c_int = ord(c)
         is_consecutive.prev, prev = c_int, is_consecutive.prev
@@ -223,7 +224,7 @@ def _collapseStringToRanges(s: str, re_escape: bool = True):
     return "".join(ret)
 
 
-def _flatten(ll: List):
+def _flatten(ll: list) -> list:
     ret = []
     for i in ll:
         if isinstance(i, list):

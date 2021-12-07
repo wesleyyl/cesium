@@ -48,7 +48,7 @@ def assert_features_equal(actual, desired, fname):
         "%s"
     ) % (fname, actual, desired, error_report))
 
-class AbstractTest:
+class AbstractTest(object):
     features = []
     features_groups = {}
     features_map = {}

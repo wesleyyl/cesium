@@ -64,7 +64,7 @@ class config(old_config):
                         % (e, self.compiler.__class__.__name__)
                     print(textwrap.dedent("""\
                         ============================================================================"""))
-                    raise distutils.errors.DistutilsPlatformError(msg) from e
+                    raise distutils.errors.DistutilsPlatformError(msg)
 
             # After MSVC is initialized, add an explicit /MANIFEST to linker
             # flags.  See issues gh-4245 and gh-4101 for details.  Also
@@ -92,13 +92,12 @@ class config(old_config):
         save_compiler = self.compiler
         if lang in ['f77', 'f90']:
             self.compiler = self.fcompiler
-        if self.compiler is None:
-            raise CompileError('%s compiler is not set' % (lang,))
         try:
             ret = mth(*((self,)+args))
         except (DistutilsExecError, CompileError) as e:
+            str(e)
             self.compiler = save_compiler
-            raise CompileError from e
+            raise CompileError
         self.compiler = save_compiler
         return ret
 

@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: libroadrunner
+Version: 2.0.5
+Summary: libRoadRunner: A simulation and analysis library for SBML
+Home-page: http://libroadrunner.org
+Author: J Kyle Medley, Andy Somogyi, Herbert Sauro
+Author-email: tellurium-discuss@u.washington.edu
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: C++
+Requires-Dist: numpy (==1.19.3)
+
+UNKNOWN
+
+

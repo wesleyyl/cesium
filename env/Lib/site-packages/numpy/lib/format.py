@@ -41,7 +41,7 @@ Capabilities
 - Is straightforward to reverse engineer. Datasets often live longer than
   the programs that created them. A competent developer should be
   able to create a solution in their preferred programming language to
-  read most ``.npy`` files that they have been given without much
+  read most ``.npy`` files that he has been given without much
   documentation.
 
 - Allows memory-mapping of the data. See `open_memmep`.
@@ -156,8 +156,8 @@ names.
 Notes
 -----
 The ``.npy`` format, including motivation for creating it and a comparison of
-alternatives, is described in the
-:doc:`"npy-format" NEP <neps:nep-0001-npy-format>`, however details have
+alternatives, is described in the `"npy-format" NEP
+<https://www.numpy.org/neps/nep-0001-npy-format.html>`_, however details have
 evolved with time and this document is more current.
 
 """
@@ -173,7 +173,6 @@ from numpy.compat import (
 __all__ = []
 
 
-EXPECTED_KEYS = {'descr', 'fortran_order', 'shape'}
 MAGIC_PREFIX = b'\x93NUMPY'
 MAGIC_LEN = len(MAGIC_PREFIX) + 2
 ARRAY_ALIGN = 64 # plausible values are powers of 2 between 16 and 4096
@@ -281,26 +280,14 @@ def dtype_to_descr(dtype):
         return dtype.str
 
 def descr_to_dtype(descr):
-    """
-    Returns a dtype based off the given description.
+    '''
+    descr may be stored as dtype.descr, which is a list of
+    (name, format, [shape]) tuples where format may be a str or a tuple.
+    Offsets are not explicitly saved, rather empty fields with
+    name, format == '', '|Vn' are added as padding.
 
-    This is essentially the reverse of `dtype_to_descr()`. It will remove
-    the valueless padding fields created by, i.e. simple fields like
-    dtype('float32'), and then convert the description to its corresponding
-    dtype.
-
-    Parameters
-    ----------
-    descr : object
-        The object retreived by dtype.descr. Can be passed to
-        `numpy.dtype()` in order to replicate the input dtype.
-
-    Returns
-    -------
-    dtype : dtype
-        The dtype constructed by the description.
-
-    """
+    This function reverses the process, eliminating the empty padding fields.
+    '''
     if isinstance(descr, str):
         # No padding removal needed
         return numpy.dtype(descr)
@@ -379,7 +366,7 @@ def _wrap_header(header, version):
         header_prefix = magic(*version) + struct.pack(fmt, hlen + padlen)
     except struct.error:
         msg = "Header length {} too big for version={}".format(hlen, version)
-        raise ValueError(msg) from None
+        raise ValueError(msg)
 
     # Pad the header with spaces and a final newline such that the magic
     # string, the header-length short and the header are aligned on a
@@ -433,6 +420,7 @@ def _write_array_header(fp, d, version=None):
         header.append("'%s': %s, " % (key, repr(value)))
     header.append("}")
     header = "".join(header)
+    header = _filter_header(header)
     if version is None:
         header = _wrap_header_guess_version(header)
     else:
@@ -590,27 +578,23 @@ def _read_array_header(fp, version):
     #   "shape" : tuple of int
     #   "fortran_order" : bool
     #   "descr" : dtype.descr
-    # Versions (2, 0) and (1, 0) could have been created by a Python 2
-    # implementation before header filtering was implemented.
-    if version <= (2, 0):
-        header = _filter_header(header)
+    header = _filter_header(header)
     try:
         d = safe_eval(header)
     except SyntaxError as e:
-        msg = "Cannot parse header: {!r}"
-        raise ValueError(msg.format(header)) from e
+        msg = "Cannot parse header: {!r}\nException: {!r}"
+        raise ValueError(msg.format(header, e))
     if not isinstance(d, dict):
         msg = "Header is not a dictionary: {!r}"
         raise ValueError(msg.format(d))
-
-    if EXPECTED_KEYS != d.keys():
-        keys = sorted(d.keys())
+    keys = sorted(d.keys())
+    if keys != ['descr', 'fortran_order', 'shape']:
         msg = "Header does not contain the correct keys: {!r}"
-        raise ValueError(msg.format(d.keys()))
+        raise ValueError(msg.format(keys))
 
     # Sanity-check the values.
     if (not isinstance(d['shape'], tuple) or
-            not all(isinstance(x, int) for x in d['shape'])):
+            not numpy.all([isinstance(x, int) for x in d['shape']])):
         msg = "shape is not valid: {!r}"
         raise ValueError(msg.format(d['shape']))
     if not isinstance(d['fortran_order'], bool):
@@ -618,9 +602,9 @@ def _read_array_header(fp, version):
         raise ValueError(msg.format(d['fortran_order']))
     try:
         dtype = descr_to_dtype(d['descr'])
-    except TypeError as e:
+    except TypeError:
         msg = "descr is not a valid dtype descriptor: {!r}"
-        raise ValueError(msg.format(d['descr'])) from e
+        raise ValueError(msg.format(d['descr']))
 
     return d['shape'], d['fortran_order'], dtype
 
@@ -750,7 +734,7 @@ def read_array(fp, allow_pickle=False, pickle_kwargs=None):
             # Friendlier error message
             raise UnicodeError("Unpickling a python object failed: %r\n"
                                "You may need to pass the encoding= option "
-                               "to numpy.load" % (err,)) from err
+                               "to numpy.load" % (err,))
     else:
         if isfileobj(fp):
             # We can use the fast fromfile() function.
@@ -836,7 +820,7 @@ def open_memmap(filename, mode='r+', dtype=None, shape=None,
 
     See Also
     --------
-    numpy.memmap
+    memmap
 
     """
     if isfileobj(filename):
