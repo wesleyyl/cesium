@@ -57,59 +57,27 @@ def index():
       return render_template('index.html', value=result[0])
     else:
       return render_template('index.html', value="")
-    #return render_template('index.html')
-
-#FIND A WAY TO DELETE THE FILE AFTER DOWNLOADING IT!!
-
-
-"""
-@app.route("/download/<path:filename>", methods = ['GET'])
-def download_zipfile(filename):
-  return render_template('download.html', value=filename)
-"""
-
-  # if '/' in filename or '\\' in filename:
-    # abort(404)
-  #return send_from_directory(app.static_folder, filename, as_attachment=True)
 
 
 @app.route("/download/<filename>")
 def download_file(filename):
   #filepath = os.path.join(app.static_folder, app.config["FILENAME"])
   #filepath = app.static_folder
+
+  filepath = os.path.join(app.static_folder, app.config["FILENAME"])
+  
+  # @app.after_request
+  # def delete_file(response):
+  #   try:
+  #     os.remove(filepath)
+  #   except Exception as error:
+  #     app.logger.error("Error removing downloaded file handle", error)
+  #   return response
+
   try:
     return send_from_directory(app.static_folder, filename, as_attachment=True)
-    #return send_file(file_path, as_attachment=True, attachment_filename="")
   except FileNotFoundError:
     abort(404)
-
-"""
-Replace with single endpoint
-
-@app.route("/download/<path:filename>", methods = ['GET'])
-def download_zipfile(filename):
-  file_path = app.static_folder + filename
-  try:
-    return send_from_directory(file_path, filename, as_attachment=True)
-    #return send_file(file_path, as_attachment=True, attachment_filename="")
-  except FileNotFound:
-    abort(404)
-
-
-#Line 32:
-  return redirect('/download/' + app.config["FILENAME"])
-
-"""
-
-
-# @app.route("/delete-files/<filename>")
-# def remove_zipfile(filename):
-#   try:
-#     os.remove(os.path.join(app.static_folder, app.config["FILENAME"]))
-#   except Exception as error:
-#     pass
-
-
 
 
 
@@ -121,21 +89,16 @@ def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
     os.remove(filepath)
 
   def createToZipFile(zipfilename, filename, antimony_model): #simplify by removing zipfilename parameter
-    #filepath = os.path.join(app.static_folder, zipfilename)
     with ZipFile(filepath, "a") as zip_file:
       zip_file.writestr(filename, antimony_model)
 
-  
 
   try:
     if mass_conserved == -1:
       query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator }
     else:
       query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator, "mass_conserved" : mass_conserved }
-    #query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator, "mass_conserved" : mass_conserved }
     model_IDS = mm.get_ids(query)
-
-
 
     # createZipFile("download.zip")
     if model_IDS:
