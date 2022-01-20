@@ -30,6 +30,7 @@ def startup():
     global cur
     astr = "mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net"
     #client = MongoClient(astr)
+    #MY CHANGES!!!!
     client = MongoClient(astr, tlsCAFile=ca) ###fixes the pymongo.errors.ServerSelectionTimeoutError
     database_names = client.list_database_names()
     db = client['networks']

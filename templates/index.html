@@ -1,45 +1,66 @@
 <!-- form that gets the num_nodes, num_reactions, oscillator, mass_conserved -->
-
 <!doctype html>
-	<title>Oscillator Database Download</title>
-	<h2>Oscillator Database Parameters:</h2>
+<html lang="en">
+	<head>
+		<title>Oscillator DB</title>
 
+		<!-- meta tags -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<form>
-		<label for="num_nodes">Number of Nodes:</label>
-		<input type="text" id="num_nodes" name="num_nodes"><br><br>
-		<label for="num_reactions">Number of Reactions:</label>
-		<input type="text" id="num_reactions" name="num_reactions"><br><br>
-		<label for="oscillator">Does the model oscillate?</label>
-		<select id="oscillator" name="oscillator">
-			<option value="osc_yes">Yes</option>
-			<option value="osc_no">No</option>
-		</select><br><br>
-		<label for="mass_conserved">Is mass conserved?</label>
-		<select id="mass_conserved" name="mass_conserved">
-			<option value="conserved_yes">Yes</option>
-			<option value="conserved_no">No</option>
-			<option value="conserved_NA">N/A</option>
-		</select><br><br>
-		<input type="submit" value="Download Models">
-	</form>
+		<!-- CSS -->
+		<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"> -->
 
-	<h3>{{ value }}</h3>
+	</head>
 
+	<body>
 
+		<!-- Navigation Bar -->
+		<div class="topnav">
+	  	<a class="active" href="#home">Home</a>
+		  <a href="#userguide">User Guide</a>
+		  <a href="#about">About</a>
+		</div>
 
+		<h1>Oscillator Database:</h1>
 
-<!--
-<form action="" method="get">
-                Celsius temperature: <input type="text" name="celsius">
-                ID: <input type="text" name="id">
-                Number of Nodes: <input type="text" name="num_nodes">
-                Number of Reactions: <input type="text" name="num_reactions">
-                Oscillator: <select id="oscillator" name="oscillator">
-                  <option value="True">True</option>
-                  <option value="False">False</option>
-                </select>
-                <input type="submit" value="Convert to Fahrenheit">
-            </form>"""
-        + "Fahrenheit: "
--->
+		<form>
+			<label for="num_nodes">Number of Nodes:</label>
+			<input type="text" id="num_nodes" name="num_nodes"><br><br>
+
+			<label for="num_reactions">Number of Reactions:</label>
+			<input type="text" id="num_reactions" name="num_reactions"><br><br>
+
+			<label for="oscillator">Does the model oscillate?</label>
+			<select id="oscillator" name="oscillator">
+				<option value="osc_yes">Yes</option>
+				<option value="osc_no">No</option>
+			</select><br><br>
+
+			<label for="autocatalysis">Autocatalysis?</label>
+			<select id="autocatalysis" name="autocatalysis">
+				<option value="catalysis_yes">Yes</option>
+				<option value="catalysis_no">No</option>
+			</select><br><br>
+
+			<label for="oscillator">Degradation?</label>
+			<select id="degradation" name="degradation">
+				<option value="degrade_yes">Yes</option>
+				<option value="degrade_no">No</option>
+			</select><br><br>
+
+			<input type="submit" value="Download Models">
+		</form>
+
+		<h3>{{ value }}</h3>
+
+	</body>
+</html>
+
+<!-- 
+<label for="mass_conserved">Is mass conserved?</label>
+			<select id="mass_conserved" name="mass_conserved">
+				<option value="conserved_yes">Yes</option>
+				<option value="conserved_no">No</option>
+				<option value="conserved_NA">N/A</option>
+			</select><br><br> -->
