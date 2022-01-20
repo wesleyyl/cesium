@@ -13,8 +13,9 @@ from zipfile import ZipFile
 import os
 
 #Initializing Flask app and mongoMethods Startup
-app = Flask(__name__, static_folder = 'download')
+app = Flask(__name__, static_folder = 'static')
 mm.startup()
+app.config["DOWNLOAD_FOLDER"] = 'download'
 app.config["FILENAME"] = "download.zip"
 
 
@@ -24,7 +25,8 @@ def index():
     num_nodes = request.args.get("num_nodes", "")
     num_reactions = request.args.get("num_reactions", "")
     oscillator = request.args.get("oscillator", "")
-    mass_conserved = request.args.get("mass_conserved", "")
+    autocatalysis = request.args.get("autocatalysis", "")
+    degradation = request.args.get("degradation", "")
 
     try:
       num_nodes = int(num_nodes)
@@ -39,16 +41,7 @@ def index():
     else:
       oscillator_status = -1; #default value when website first loaded
 
-    if mass_conserved == "conserved_yes":
-      conserved = True
-    elif mass_conserved == "conserved_no":
-      conserved = False
-    elif mass_conserved == "conserved_NA":
-      conserved = -1
-    else:
-      conserved = -1; #default value when website first loaded
-
-    result = oscillatorDB(num_nodes, num_reactions, oscillator_status, conserved)
+    result = oscillatorDB(num_nodes, num_reactions, oscillator_status)
 
     if result[0] == "Done":
       return render_template('download.html', value=result[1])
@@ -64,7 +57,7 @@ def download_file(filename):
   #filepath = os.path.join(app.static_folder, app.config["FILENAME"])
   #filepath = app.static_folder
 
-  filepath = os.path.join(app.static_folder, app.config["FILENAME"])
+  filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["FILENAME"])
   
   # @app.after_request
   # def delete_file(response):
@@ -75,16 +68,16 @@ def download_file(filename):
   #   return response
 
   try:
-    return send_from_directory(app.static_folder, filename, as_attachment=True)
+    return send_from_directory(app.config["DOWNLOAD_FOLDER"], filename, as_attachment=True)
   except FileNotFoundError:
     abort(404)
 
 
 
 #Function to process parameters and create download.zip
-def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
+def oscillatorDB(num_nodes, num_reactions, oscillator):
 
-  filepath = os.path.join(app.static_folder, app.config["FILENAME"])
+  filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["FILENAME"])
   if os.path.exists(filepath):
     os.remove(filepath)
 
@@ -94,10 +87,7 @@ def oscillatorDB(num_nodes, num_reactions, oscillator, mass_conserved):
 
 
   try:
-    if mass_conserved == -1:
-      query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator }
-    else:
-      query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator, "mass_conserved" : mass_conserved }
+    query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator }
     model_IDS = mm.get_ids(query)
 
     # createZipFile("download.zip")

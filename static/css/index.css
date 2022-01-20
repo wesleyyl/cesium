@@ -1,6 +1,6 @@
 body {
 	background-color: lightblue;
-	opacity: 0.3;
+	opacity: 0.9;
 }
 
 /* Add a black background color to the top navigation */
@@ -12,6 +12,7 @@ body {
 /* Style the links inside the navigation bar */
 .topnav a {
   float: left;
+  display: block;
   color: #f2f2f2;
   text-align: center;
   padding: 14px 16px;
@@ -25,8 +26,13 @@ body {
   color: black;
 }
 
-/* Add a color to the active/current link */
+/* Add an active class to highlight the current page */
 .topnav a.active {
   background-color: #04AA6D;
   color: white;
+}
+
+/* Hide the link that should open and close the topnav on small screens */
+.topnav .icon {
+  display: none;
 }

@@ -9,17 +9,20 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 		<!-- CSS -->
-		<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}"> -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 
 	</head>
 
 	<body>
 
 		<!-- Navigation Bar -->
-		<div class="topnav">
-	  	<a class="active" href="#home">Home</a>
+		<div class="topnav" id="myTopnav">
+	  	<a class="active" class="active">Home</a>
 		  <a href="#userguide">User Guide</a>
 		  <a href="#about">About</a>
+		  <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+    		<i class="fa fa-bars"></i>
+  		</a>
 		</div>
 
 		<h1>Oscillator Database:</h1>
