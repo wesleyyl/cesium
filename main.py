@@ -1,4 +1,4 @@
-#Flask
+#Flask Packages
 from flask import Flask, request, render_template, redirect, url_for, send_from_directory
 from flask import Response
 
@@ -15,6 +15,9 @@ import os
 #Initializing Flask app and mongoMethods Startup
 app = Flask(__name__, static_folder = 'static')
 mm.startup()
+
+
+#Config Values
 app.config["DOWNLOAD_FOLDER"] = 'download'
 app.config["FILENAME"] = "download.zip"
 
@@ -50,7 +53,6 @@ def index():
       return render_template('index.html', value=result[0])
     else:
       return render_template('index.html', value="")
-
 
 @app.route("/download/<filename>")
 def download_file(filename):
@@ -102,6 +104,14 @@ def oscillatorDB(num_nodes, num_reactions, oscillator):
 
   except ValueError:
     return ["Invalid Input"]
+
+@app.route("/about")
+def about():
+  return render_template('about.html')
+
+@app.route("/guide")
+def guide():
+  return render_template('guide.html')
 
 #Flask Development Server
 if __name__ == "__main__":
