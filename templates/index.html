@@ -1,69 +1,45 @@
-<!-- form that gets the num_nodes, num_reactions, oscillator, mass_conserved -->
-<!doctype html>
-<html lang="en">
-	<head>
-		<title>Oscillator DB</title>
+<!-- Info -->
+{% extends "base.html" %}
+{% set active_page = "index" %}
+{% block title %}Oscillator DB Home{% endblock %}
 
-		<!-- meta tags -->
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% block content %}
 
-		<!-- CSS -->
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<h1>Oscillator Database:</h1>
 
-	</head>
+<form>
+	<label for="num_nodes">Number of Nodes:</label>
+	<input type="text" id="num_nodes" name="num_nodes"><br><br>
 
-	<body>
+	<label for="num_reactions">Number of Reactions:</label>
+	<input type="text" id="num_reactions" name="num_reactions"><br><br>
 
-		<!-- Navigation Bar -->
-		<div class="topnav" id="myTopnav">
-	  	<a class="active" class="active">Home</a>
-		  <a href="#userguide">User Guide</a>
-		  <a href="#about">About</a>
-		  <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-    		<i class="fa fa-bars"></i>
-  		</a>
-		</div>
+	<label for="oscillator">Does the model oscillate?</label>
+	<select id="oscillator" name="oscillator">
+		<option value="osc_yes">Yes</option>
+		<option value="osc_no">No</option>
+	</select><br><br>
 
-		<h1>Oscillator Database:</h1>
+	<label for="autocatalysis">Autocatalysis?</label>
+	<select id="autocatalysis" name="autocatalysis">
+		<option value="catalysis_yes">Yes</option>
+		<option value="catalysis_no">No</option>
+	</select><br><br>
 
-		<form>
-			<label for="num_nodes">Number of Nodes:</label>
-			<input type="text" id="num_nodes" name="num_nodes"><br><br>
+	<label for="oscillator">Degradation?</label>
+	<select id="degradation" name="degradation">
+		<option value="degrade_yes">Yes</option>
+		<option value="degrade_no">No</option>
+	</select><br><br>
 
-			<label for="num_reactions">Number of Reactions:</label>
-			<input type="text" id="num_reactions" name="num_reactions"><br><br>
+	<input type="submit" value="Download Models">
+</form>
 
-			<label for="oscillator">Does the model oscillate?</label>
-			<select id="oscillator" name="oscillator">
-				<option value="osc_yes">Yes</option>
-				<option value="osc_no">No</option>
-			</select><br><br>
+{% endblock %}
 
-			<label for="autocatalysis">Autocatalysis?</label>
-			<select id="autocatalysis" name="autocatalysis">
-				<option value="catalysis_yes">Yes</option>
-				<option value="catalysis_no">No</option>
-			</select><br><br>
-
-			<label for="oscillator">Degradation?</label>
-			<select id="degradation" name="degradation">
-				<option value="degrade_yes">Yes</option>
-				<option value="degrade_no">No</option>
-			</select><br><br>
-
-			<input type="submit" value="Download Models">
-		</form>
-
-		<h3>{{ value }}</h3>
-
-	</body>
-</html>
-
-<!-- 
-<label for="mass_conserved">Is mass conserved?</label>
-			<select id="mass_conserved" name="mass_conserved">
-				<option value="conserved_yes">Yes</option>
-				<option value="conserved_no">No</option>
-				<option value="conserved_NA">N/A</option>
-			</select><br><br> -->
+<!-- <script>
+	$(document).ready(function(){
+		$(".active").removeClass("active");
+		$("#link-index").addClass("active");
+	});
+</script> -->

@@ -1,0 +1,17 @@
+body {
+	background-color: aliceblue;
+	opacity: 0.9;
+  margin: 0px;
+}
+
+#footer {
+  text-align: center;
+  background-color: gainsboro;
+  color: white;
+
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 0px;
+  /*padding: 10px 10px 0px 10px;*/
+}

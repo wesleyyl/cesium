@@ -1,0 +1,80 @@
+<!-- form that gets the num_nodes, num_reactions, oscillator, mass_conserved -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Oscillator DB</title>
+
+		<!-- meta tags -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- CSS -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+	</head>
+
+	<body>
+
+		<!-- Navigation Bar -->
+		<div class="topnav" id="myTopnav">
+	  		<a href="/" class="active" class="active">Home</a>
+		 	<a href="/guide">User Guide</a>
+		 	<a href="/about">About</a>
+		 	<a href="javascript:void(0);" class="icon" onclick="myFunction()">
+    		<i class="fa fa-bars"></i>
+  		</a>
+		</div>
+
+		<h1>Oscillator Database:</h1>
+
+		<form>
+			<label for="num_nodes">Number of Nodes:</label>
+			<input type="text" id="num_nodes" name="num_nodes"><br><br>
+
+			<label for="num_reactions">Number of Reactions:</label>
+			<input type="text" id="num_reactions" name="num_reactions"><br><br>
+
+			<label for="oscillator">Does the model oscillate?</label>
+			<select id="oscillator" name="oscillator">
+				<option value="osc_yes">Yes</option>
+				<option value="osc_no">No</option>
+			</select><br><br>
+
+			<label for="autocatalysis">Autocatalysis?</label>
+			<select id="autocatalysis" name="autocatalysis">
+				<option value="catalysis_yes">Yes</option>
+				<option value="catalysis_no">No</option>
+			</select><br><br>
+
+			<label for="oscillator">Degradation?</label>
+			<select id="degradation" name="degradation">
+				<option value="degrade_yes">Yes</option>
+				<option value="degrade_no">No</option>
+			</select><br><br>
+
+			<input type="submit" value="Download Models">
+		</form>
+
+		<h3>{{ value }}</h3>
+
+		<script>
+		function myFunction() {
+		  var x = document.getElementById("myTopnav");
+		  if (x.className === "topnav") {
+		    x.className += " responsive";
+		  } else {
+		    x.className = "topnav";
+		  }
+		}
+		</script>
+
+	</body>
+</html>
+
+<!-- 
+<label for="mass_conserved">Is mass conserved?</label>
+			<select id="mass_conserved" name="mass_conserved">
+				<option value="conserved_yes">Yes</option>
+				<option value="conserved_no">No</option>
+				<option value="conserved_NA">N/A</option>
+			</select><br><br> -->
