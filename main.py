@@ -37,6 +37,10 @@ def index():
     except ValueError:
       pass
 
+    # num_nodes = 3
+    # num_reactions = 5
+    # WHY ARE THESE 2 VALUES NOT BEING PASSED/RETURNED?!
+
     if oscillator == "osc_yes":
       oscillator_status = True
     elif oscillator == "osc_no":
