@@ -6,8 +6,16 @@
 {% block content %}
   <h1 align="center">Download File</h1>
    <div class="container" align="center">
-    <a href="{{ url_for('download_file', filename=value) }}" target="_blank"><button class='btn btn-default'>Download Zip File</button></a>
+    <a href="{{ url_for('download_file', filename=filename) }}" target="_blank"><button class='btn btn-default'>Download Zip File</button></a>
     <br><br>
     <a href="/" target="_self"><button class='btn btn-default'>Download Another File</button></a>
    </div>
+
+
+   <h2>Query Values Debug:</h2>
+   <p> Nodes: {{ num_nodes }} </p>
+   <p> Reactions: {{ num_reactions }} </p>
+   <p> Oscillation?: {{ oscillator }} </p>
+   <p> Autocatalysis?: {{ autocatalysis }} </p>
+   <p> Degradation?: {{ degradation }} </p>
  {% endblock %}

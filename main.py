@@ -1,6 +1,7 @@
 #Flask Packages
-from flask import Flask, request, render_template, redirect, url_for, send_from_directory
+from flask import Flask, request, render_template, url_for, send_from_directory
 from flask import Response
+#from flask import redirect
 
 #mongoMethods Dependencies
 import pymongo
@@ -11,6 +12,7 @@ import oscillatorDB.mongoMethods as mm
 #Miscellaneous Packages
 from zipfile import ZipFile
 import os
+
 
 #Initializing Flask app and mongoMethods Startup
 app = Flask(__name__, static_folder = 'static')
@@ -25,38 +27,93 @@ app.config["FILENAME"] = "download.zip"
 #Index Page
 @app.route("/")
 def index():
-    num_nodes = request.args.get("num_nodes", "")
-    num_reactions = request.args.get("num_reactions", "")
-    oscillator = request.args.get("oscillator", "")
-    autocatalysis = request.args.get("autocatalysis", "")
-    degradation = request.args.get("degradation", "")
+    
+    return render_template('index.html')
 
-    try:
-      num_nodes = int(num_nodes)
-      num_reactions = int(num_reactions)
-    except ValueError:
-      pass
 
-    # num_nodes = 3
-    # num_reactions = 5
-    # WHY ARE THESE 2 VALUES NOT BEING PASSED/RETURNED?!
+    # num_nodes = request.args.get("num_nodes", "")
+    # num_reactions = request.args.get("num_reactions", "")
+    # oscillator = request.args.get("oscillator", "")
+    # autocatalysis = request.args.get("autocatalysis", "")
+    # degradation = request.args.get("degradation", "")
 
+    # try:
+    #   num_nodes = int(num_nodes)
+    #   num_reactions = int(num_reactions)
+    # except ValueError:
+    #   pass
+
+    # # num_nodes = 3
+    # # num_reactions = 5
+    # # WHY ARE THESE 2 VALUES NOT BEING PASSED/RETURNED?!
+
+    # if oscillator == "osc_yes":
+    #   oscillator_status = True
+    # elif oscillator == "osc_no":
+    #   oscillator_status = False
+    # else:
+    #   oscillator_status = -1; #default value when website first loaded
+
+    # result = oscillatorDB(num_nodes, num_reactions, oscillator_status)
+
+    # if result[0] == "Done":
+    #   return render_template('download.html', value=result[1])
+    #   #return redirect('/download/' + app.config["FILENAME"])
+    # elif result == "No entries found":
+    #   return render_template('index.html', value=result[0])
+    # else:
+    #   return render_template('index.html', value="")
+
+@app.route("/download", methods = ['GET', 'POST'])
+def download():
+  if request.method == 'GET':
+      return render_template('error_novalues.html') #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
+
+      #return "No data submitted. Please submit query data through the form."
+      
+
+  elif request.method == 'POST':
+    form_data = request.form #this is a dictionary w/ keys & values
+
+    num_nodes = int(form_data.get("num_nodes"))
+    num_reactions = int(form_data.get("num_reactions"))
+    oscillator = form_data.get("oscillator")
+    autocatalysis = form_data.get("autocat")
+    degradation = form_data.get("degrade")
+
+    # try:
+    #   num_nodes = int(num_nodes)
+    #   num_reactions = int(num_reactions)
+    # except ValueError:
+    #   pass
+
+
+    #CONVERTS HTML FORM VALUES TO BOOLEAN
     if oscillator == "osc_yes":
       oscillator_status = True
     elif oscillator == "osc_no":
       oscillator_status = False
-    else:
-      oscillator_status = -1; #default value when website first loaded
 
+    #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NO!
+    if autocatalysis == "Y/N":
+      autocatalysis = False
+
+    #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NO!
+    if degradation == "Y/N":
+      degradation = False
+
+    
     result = oscillatorDB(num_nodes, num_reactions, oscillator_status)
 
-    if result[0] == "Done":
-      return render_template('download.html', value=result[1])
-      #return redirect('/download/' + app.config["FILENAME"])
-    elif result == "No entries found":
-      return render_template('index.html', value=result[0])
-    else:
-      return render_template('index.html', value="")
+    # return render_template('download.html', filename=app.config["FILENAME"])
+
+    #DEBUG CODE: TO LOAD PAGE WITH QUERY VALUES UNDERNEATH
+    return render_template('download.html', filename=app.config["FILENAME"], num_nodes=num_nodes, num_reactions=num_reactions, oscillator=oscillator_status, autocatalysis=autocatalysis)
+
+    #DEBUG CODE: TO CHECK THAT VALUES ARE ACTUALLY GOING THROUGH
+    # return form_data
+    #DEBUG CODE: TO CHECK THAT SPECIFIC VALUE IS CORRECT
+    # return str(num_nodes)
 
 @app.route("/download/<filename>")
 def download_file(filename):

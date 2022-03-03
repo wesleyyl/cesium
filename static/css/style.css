@@ -1,17 +1,25 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
 	background-color: aliceblue;
 	opacity: 0.9;
   margin: 0px;
+  margin-bottom: 100px;
 }
 
 #footer {
   text-align: center;
   background-color: gainsboro;
   color: white;
+  opacity: 0.8;
 
-  position: fixed;
+  position: absolute;
   bottom: 0;
   width: 100%;
-  padding: 0px;
+  height: 100px;
+  padding: 5px;
   /*padding: 10px 10px 0px 10px;*/
 }
