@@ -170,9 +170,9 @@ def oscillatorDB(num_nodes, num_reactions, oscillator):
 def about():
   return render_template('about.html')
 
-@app.route("/guide")
-def guide():
-  return render_template('guide.html')
+@app.route("/faq")
+def faq():
+  return render_template('faq.html')
 
 #Flask Development Server
 if __name__ == "__main__":
