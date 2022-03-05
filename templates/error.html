@@ -1,13 +1,15 @@
 <!-- Info -->
 {% extends "base.html" %}
 {% set active_page = "" %}
-{% block title %}Caesium DB Error{% endblock %}
+{% block title %}Cesium DB Error{% endblock %}
 
 {% block content %}
 
 <h1 align="center">Error:</h1>
 <br>
-<p>No query data submitted. Please submit query data through the form page.</p>
+<p>{{ error_msg }}</p>
+<br><br>
+<a href="/" target="_self"><button class='btn btn-default'>Return Home</button></a>
 
 {% endblock %}
 

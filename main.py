@@ -67,7 +67,8 @@ def index():
 @app.route("/download", methods = ['GET', 'POST'])
 def download():
   if request.method == 'GET':
-      return render_template('error_novalues.html') #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
+      error = "No query data submitted. Please submit query data through the form page."
+      return render_template('error.html', error_msg=error) #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
 
       #return "No data submitted. Please submit query data through the form."
       
@@ -103,12 +104,27 @@ def download():
       degradation = False
 
     
-    result = oscillatorDB(num_nodes, num_reactions, oscillator_status)
+    status = oscillatorDB(num_nodes, num_reactions, oscillator_status)
+
+    queryParam = {
+      'nodes' : num_nodes,
+      'reac' : num_reactions,
+      'osc' : oscillator_status,
+      'autocat' : autocatalysis,
+      'degrade' : degradation
+    }
 
     # return render_template('download.html', filename=app.config["FILENAME"])
 
     #DEBUG CODE: TO LOAD PAGE WITH QUERY VALUES UNDERNEATH
-    return render_template('download.html', filename=app.config["FILENAME"], num_nodes=num_nodes, num_reactions=num_reactions, oscillator=oscillator_status, autocatalysis=autocatalysis)
+    if status == 1:
+      return render_template('download.html', filename=app.config["FILENAME"], query=queryParam)
+    elif status == 0:
+      error = "No models found. Please try something different."
+      return render_template('error.html', error_msg=error)
+    elif status == -1:
+      error = "Invalid inputs. Please try again."
+      return render_template('error.html', error_msg=error)
 
     #DEBUG CODE: TO CHECK THAT VALUES ARE ACTUALLY GOING THROUGH
     # return form_data
@@ -138,6 +154,11 @@ def download_file(filename):
 
 
 #Function to process parameters and create download.zip
+# 
+# return -1: invalid inputs (fix later with form validation features)
+# return 0: no models found using that query
+# return 1: query successful
+# 
 def oscillatorDB(num_nodes, num_reactions, oscillator):
 
   filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["FILENAME"])
@@ -159,12 +180,15 @@ def oscillatorDB(num_nodes, num_reactions, oscillator):
         ant = mm.get_antimony({ "ID" : ID })
         filename = str(ID) + ".txt"
         createToZipFile(app.config["FILENAME"], filename, ant) #can simplify by removing first parameter
-      return ["Done", app.config["FILENAME"]]
+      return 1
     else:
-      return ["No entries found"]
+      return 0
 
   except ValueError:
-    return ["Invalid Input"]
+    return -1
+
+
+
 
 @app.route("/about")
 def about():

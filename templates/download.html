@@ -1,7 +1,7 @@
 <!-- Info -->
 {% extends "base.html" %}
 {% set active_page = "" %}
-{% block title %}Caesium DB Download File{% endblock %}
+{% block title %}Cesium DB Download File{% endblock %}
 
 {% block content %}
   <h1 align="center">Download File</h1>
@@ -11,11 +11,12 @@
     <a href="/" target="_self"><button class='btn btn-default'>Download Another File</button></a>
    </div>
 
+   <br>
 
    <h2>Query Values Debug:</h2>
-   <p> Nodes: {{ num_nodes }} </p>
-   <p> Reactions: {{ num_reactions }} </p>
-   <p> Oscillation?: {{ oscillator }} </p>
-   <p> Autocatalysis?: {{ autocatalysis }} </p>
-   <p> Degradation?: {{ degradation }} </p>
+   <p> Nodes: {{ query['nodes'] }} </p>
+   <p> Reactions: {{ query['reac'] }} </p>
+   <p> Oscillation?: {{ query['osc'] }} </p>
+   <p> Autocatalysis?: {{ query['autocat'] }} </p>
+   <p> Degradation?: {{ query['degrade'] }} </p>
  {% endblock %}
