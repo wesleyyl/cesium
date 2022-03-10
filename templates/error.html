@@ -1,15 +1,22 @@
-<!-- Info -->
+Info -->
 {% extends "base.html" %}
 {% set active_page = "" %}
 {% block title %}Cesium DB Error{% endblock %}
 
 {% block content %}
 
-<h1 align="center">Error:</h1>
-<br>
-<p>{{ error_msg }}</p>
-<br><br>
-<a href="/" target="_self"><button class='btn btn-default'>Return Home</button></a>
+<div class="my-4" align="center">
+	<h1>Error:</h1>
+	<br>
+
+	<div class="alert alert-danger" role="alert">
+		{{error_msg}}
+	</div>
+	<br><br>
+
+	<!-- <p>{{ error_msg }}</p> -->
+	<a href="/" target="_self"><button class='btn btn-outline-dark'>Return Home</button></a>
+</div>
 
 {% endblock %}
 
@@ -18,4 +25,4 @@
 		$(".active").removeClass("active");
 		$("#link-guide").addClass("active");
 	});
-</script> -->
+</script>

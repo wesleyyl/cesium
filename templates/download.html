@@ -4,19 +4,31 @@
 {% block title %}Cesium DB Download File{% endblock %}
 
 {% block content %}
+
+<div class="my-4" align="center">
   <h1 align="center">Download File</h1>
-   <div class="container" align="center">
-    <a href="{{ url_for('download_file', filename=filename) }}" target="_blank"><button class='btn btn-default'>Download Zip File</button></a>
+
+  <div class="container-download" align="center">
+    <a href="{{ url_for('download_file', query=query) }}" target="_blank"><button class='btn btn-outline-dark'>Download Zip File</button></a>
     <br><br>
-    <a href="/" target="_self"><button class='btn btn-default'>Download Another File</button></a>
-   </div>
+    <a href="/" target="_self"><button class='btn btn-outline-dark'>Download Another File</button></a>
+  </div>
+</div>
 
-   <br>
+<br>
 
-   <h2>Query Values Debug:</h2>
-   <p> Nodes: {{ query['nodes'] }} </p>
-   <p> Reactions: {{ query['reac'] }} </p>
-   <p> Oscillation?: {{ query['osc'] }} </p>
-   <p> Autocatalysis?: {{ query['autocat'] }} </p>
-   <p> Degradation?: {{ query['degrade'] }} </p>
- {% endblock %}
+<div class="alert alert-warning" role="alert">
+  WARNING: After selecting download, it may take a few moments for the file to download.
+</div>
+<br>
+
+
+<div class="my-4">
+  <h2 align="center">Cesium Query Values:</h2>
+  <p> Nodes: {{ query['nodes'] }} </p>
+  <p> Reactions: {{ query['reac'] }} </p>
+  <p> Oscillation?: {{ query['osc'] }} </p>
+  <p> Autocatalysis?: {{ query['autocat'] }} </p>
+  <p> Degradation?: {{ query['degrade'] }} </p>
+</div>
+{% endblock %}
