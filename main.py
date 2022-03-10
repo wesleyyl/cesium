@@ -91,7 +91,7 @@ def download():
 
     #DEBUG CODE: TO LOAD PAGE WITH QUERY VALUES UNDERNEATH
     if cesiumQueryExists(queryParam):
-      return render_template('download.html', query=json.dumps(queryParam))
+      return render_template('download.html', query=queryParam, queryJSON=json.dumps(queryParam))
     elif not cesiumQueryExists(queryParam):
       error = "No models found. Please try a different query."
       return render_template('error.html', error_msg=error)
