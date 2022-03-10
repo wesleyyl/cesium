@@ -69,8 +69,13 @@ def download():
       oscillator_status = False
 
     #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NO!
+    if autocatalysis == "yes":
+      autocatalysis_status = True
+    elif autocatalysis == "no":
+      autocatalysis_status = False
+
     if autocatalysis == "Y/N":
-      autocatalysis = False
+      autocatalysis_status = False
 
     #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NO!
     if degradation == "Y/N":
@@ -80,7 +85,7 @@ def download():
       'nodes' : num_nodes,
       'reac' : num_reactions,
       'osc' : oscillator_status,
-      'autocat' : autocatalysis,
+      'autocat' : autocatalysis_status,
       'degrade' : degradation
     }
 
@@ -163,6 +168,7 @@ def faq():
 
 def cesiumQueryExists(query):
   query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
+  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
   model_IDS = mm.get_ids(query)
 
   if model_IDS:
@@ -175,6 +181,7 @@ def cesiumQuery(query):
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
 
   query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
+  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
   model_IDS = mm.get_ids(query)
   
   if model_IDS:

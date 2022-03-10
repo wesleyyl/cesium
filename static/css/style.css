@@ -12,6 +12,7 @@ body {
 
 #footer {
   text-align: center;
+  line-height: 0.7;
   background-color: gainsboro;
   color: white;
   opacity: 0.8;
@@ -19,7 +20,7 @@ body {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 100px;
-  padding: 5px;
+  height: 70px;
+  padding: 15px;
   /*padding: 10px 10px 0px 10px;*/
 }
