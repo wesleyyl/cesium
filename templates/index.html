@@ -12,12 +12,12 @@
 <!-- Notes:
 
 id does ???
-name is what you refer to in Python Flask. It is what is used as the key in request.form dictionary
+name is what you refer to in Python Flask. It is what is used as the key in Flask's request.form dictionary
 
 -->
 
 
-<form action="/download" method="POST">	
+<form action="/download" method="POST">
 	<div class="row mb-3">
 		<label for="num_nodes" class="col-sm-4 col-form-label">Number of Nodes:</label>
 		<div class="col-auto">
@@ -35,6 +35,24 @@ name is what you refer to in Python Flask. It is what is used as the key in requ
 	</div>
 
 	<fieldset class="row mb-3" autocomplete="off">
+		<legend class="col-form-label col-sm-4 pt-0">Oscillate?</legend>
+		<div class="col-auto">
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="oscillator" id="osc_yes" value="osc_yes">
+				<label class="form-check-label" for="osc_yes">
+					Yes
+				</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="oscillator" id="osc_no" value="osc_no">
+				<label class="form-check-label" for="osc_no">
+					No
+				</label>
+			</div>
+		</div>
+	</fieldset>
+
+	<!-- <fieldset class="row mb-3" autocomplete="off">
 		<legend class="col-form-label col-sm-2 pt-0">Oscillate?</legend>
 		<div class="col-sm-10">
 			<div class="form-check">
@@ -50,7 +68,7 @@ name is what you refer to in Python Flask. It is what is used as the key in requ
 				</label>
 			</div> 
 		</div>
-	</fieldset>
+	</fieldset> -->
 
 
 	<div class="row mb-3">
@@ -58,8 +76,8 @@ name is what you refer to in Python Flask. It is what is used as the key in requ
 		<div class="col-auto">
 			<select class="form-select" id="autocat" name="autocat" aria-label="Default select example" autocomplete="off" placeholder="Y/N">
 				<option selected>Y/N</option>
-				<option value="yes">Yes</option>
-				<option value="no">No</option>
+				<option value="autocat_yes">Yes</option>
+				<option value="autocat_no">No</option>
 			</select>
 		</div>
 	</div>
@@ -69,64 +87,19 @@ name is what you refer to in Python Flask. It is what is used as the key in requ
 		<div class="col-auto">
 			<select class="form-select" id="degrade" name="degrade" aria-label="Default select example" autocomplete="off" placeholder="Y/N">
 				<!-- <option selected>Y/N</option> -->
-				<option value="yes">Yes</option>
-				<option value="no">No</option>
+				<option value="degrade_yes">Yes</option>
+				<option value="degrade_no">No</option>
 			</select>
 		</div>
 	</div>
 
-	<button type="submit" class="btn btn-primary">Download Models</button>
+	<div class="row">
+		<div class="col-sm-10 text-center">
+			<button type="submit" class="btn btn-primary">Download Models</button>
+		</div>
+	</div>
 </form>
 
 
-<!-- 5.0 BOOTSTRAP w/ Desc. of Each param -->
-<!-- 	<div class="row mb-3">
-	  	<label for="num_nodes" class="form-label">Number of Nodes:</label>
-	    <input type="number" class="form-control" id="num_nodes" aria-describedby="numNodesDesc">
-	    <div id="numNodesDesc" class="form-text">The number of nodes.</div>
-	</div>
-
-	<div class="row mb-3">
-	    <label for="num_reactions" class="form-label">Number of Reactions:</label>
-	    <input type="number" class="form-control" id="num_reactions" aria-describedby="numReactionsDesc">
-	    <div id="numReactionsDesc" class="form-text">The number of reactions.</div>
-	</div> -->
-
-
-<!-- OLD FORM -->
-<!-- <form>
-	<label for="num_nodes">Number of Nodes:</label>
-	<input type="text" id="num_nodes" name="num_nodes"><br><br>
-
-	<label for="num_reactions">Number of Reactions:</label>
-	<input type="text" id="num_reactions" name="num_reactions"><br><br>
-
-	<label for="oscillator">Does the model oscillate?</label>
-	<select id="oscillator" name="oscillator">
-		<option value="osc_yes">Yes</option>
-		<option value="osc_no">No</option>
-	</select><br><br>
-
-	<label for="autocatalysis">Autocatalysis?</label>
-	<select id="autocatalysis" name="autocatalysis">
-		<option value="catalysis_yes">Yes</option>
-		<option value="catalysis_no">No</option>
-	</select><br><br>
-
-	<label for="oscillator">Degradation?</label>
-	<select id="degradation" name="degradation">
-		<option value="degrade_yes">Yes</option>
-		<option value="degrade_no">No</option>
-	</select><br><br>
-
-	<input type="submit" value="Download Models">
-</form> -->
 
 {% endblock %}
-
-<!-- <script>
-	$(document).ready(function(){
-		$(".active").removeClass("active");
-		$("#link-index").addClass("active");
-	});
-</script> -->

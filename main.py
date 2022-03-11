@@ -22,8 +22,8 @@ mm.startup()
 
 
 #Config Values
-app.config["DOWNLOAD_FOLDER"] = 'download'
-app.config["ZIPF_NAME"] = "download.zip"
+# app.config["DOWNLOAD_FOLDER"] = 'download'
+app.config["ZIPF_NAME"] = "cesium-download" #default value to be changed
 
 
 #Index Page
@@ -41,9 +41,6 @@ def download():
       error = "No query data submitted. Please submit query data through the form page."
       return render_template('error.html', error_msg=error) #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
 
-      #return "No data submitted. Please submit query data through the form."
-      
-
   elif request.method == 'POST':
     form_data = request.form #this is a dictionary w/ keys & values
 
@@ -53,41 +50,45 @@ def download():
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
 
-    # try:
-    #   num_nodes = int(num_nodes)
-    #   num_reactions = int(num_reactions)
-    # except ValueError:
-    #   pass
-
-
     #CONVERTS HTML FORM VALUES TO BOOLEAN
     if oscillator == "osc_yes":
       oscillator_status = True
     elif oscillator == "osc_no":
       oscillator_status = False
     else:
+      oscillator = "osc_no"
       oscillator_status = False
 
     #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NO!
-    if autocatalysis == "yes":
+    if autocatalysis == "autocat_yes":
       autocatalysis_status = True
-    elif autocatalysis == "no":
+    elif autocatalysis == "autocat_no":
       autocatalysis_status = False
 
     if autocatalysis == "Y/N":
+      autocatalysis = "autocat_no"
       autocatalysis_status = False
 
     #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NO!
+    if degradation == "degrade_yes":
+      degradation_status = True
+    elif degradation == "degrade_no":
+      degradation_status = False
+
     if degradation == "Y/N":
-      degradation = False
+      degradation = "degrade_no"
+      degradation_status = False
 
     queryParam = {
       'nodes' : num_nodes,
       'reac' : num_reactions,
       'osc' : oscillator_status,
       'autocat' : autocatalysis_status,
-      'degrade' : degradation
+      'degrade' : degradation_status
     }
+
+    app.config["ZIPF_NAME"] = ".".join([str(num_nodes), str(num_reactions), oscillator, autocatalysis, degradation])
+
 
     # cesiumZip = cesiumQuery(queryParam)
 
@@ -106,21 +107,19 @@ def download():
 
     #DEBUG CODE: TO CHECK THAT VALUES ARE ACTUALLY GOING THROUGH
     # return form_data
-    #DEBUG CODE: TO CHECK THAT SPECIFIC VALUE IS CORRECT
-    # return str(num_nodes)
 
 
 #Download File Page
 @app.route("/download/<query>")
 def download_file(query):
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
-  filename = app.config["ZIPF_NAME"]
-  
-  # return query
+  filename = "{}.zip".format(app.config["ZIPF_NAME"])
 
   cesiumZip = cesiumQuery(json.loads(query))
 
   return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
+
+
 
   # try:
 
@@ -134,7 +133,6 @@ def download_file(query):
     #   'Content-Disposition': 'attachment; filename=%s;' % app.config["ZIPF_NAME"]
     #   })
 
-
     #Method 2
     # response = make_response(file.read())
     # response.headers.set('Content-Type', 'zip')
@@ -142,11 +140,8 @@ def download_file(query):
 
     # return response
 
-
-
     #Method 3
     # return Response(file, mimetype='application/zip', headers={'Content-Disposition': 'attachment;filename={}'.format(filename)})
-
 
     #Method 4
     # return send_file(cesiumZip, attachment_filename=app.config["ZIPF_NAME"], as_attachment=True)
@@ -195,62 +190,8 @@ def cesiumQuery(query):
 
     return memZipFile
 
-        
   else:
     return None
-
-
-# def createTextFile(antStr, txtFileName):
-#   txtFile = io.BytesIO()
-#   with open(txtFileName, "wb") as txtF:
-#     txtF.write(antStr)
-
-
-
-# def addToZip(memZip, txtFileName, antStr): #simplify by removing zipfilename parameter
-#     with zipfile.ZipFile(zip, "w", zipfile.ZIP_DEFLATED) as zipF:
-#       zipF.writestr(txtFileName, antStr)
-
-
-
-
-
-
-
-
-#Function to process parameters and create download.zip
-# 
-# return -1: invalid inputs (fix later with form validation features)
-# return 0: no models found using that query
-# return 1: query successful
-# 
-# def oscillatorDB(num_nodes, num_reactions, oscillator):
-
-#   filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["FILENAME"])
-#   if os.path.exists(filepath):
-#     os.remove(filepath)
-
-#   def createToZipFile(zipfilename, filename, antimony_model): #simplify by removing zipfilename parameter
-#     with ZipFile(filepath, "a") as zip_file:
-#       zip_file.writestr(filename, antimony_model)
-
-
-#   try:
-#     query = { "num_nodes" : num_nodes, "num_reactions" : num_reactions, "oscillator" : oscillator }
-#     model_IDS = mm.get_ids(query)
-
-#     # createZipFile("download.zip")
-#     if model_IDS:
-#       for ID in model_IDS:
-#         ant = mm.get_antimony({ "ID" : ID })
-#         filename = str(ID) + ".txt"
-#         createToZipFile(app.config["FILENAME"], filename, ant) #can simplify by removing first parameter
-#       return 1
-#     else:
-#       return 0
-
-#   except ValueError:
-#     return -1
 
 
 
