@@ -87,7 +87,7 @@ def download():
       'degrade' : degradation_status
     }
 
-    app.config["ZIPF_NAME"] = ".".join([str(num_nodes), str(num_reactions), oscillator, autocatalysis, degradation])
+    # app.config["ZIPF_NAME"] = ".".join([str(num_nodes), str(num_reactions), oscillator, autocatalysis, degradation])
 
 
     # cesiumZip = cesiumQuery(queryParam)
@@ -113,11 +113,19 @@ def download():
 @app.route("/download/<query>")
 def download_file(query):
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
-  filename = "{}.zip".format(app.config["ZIPF_NAME"])
 
-  cesiumZip = cesiumQuery(json.loads(query))
+  query = json.loads(query)
+  # queryList = []
 
-  return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
+  cesiumZip = cesiumQuery(query)
+
+
+  # for param in queryDict.values():
+  #   queryList.append(str(param))
+
+  # filename = ".".join(queryList)
+
+  return send_file(cesiumZip, attachment_filename="{}.zip".format(filename), as_attachment=True)
 
 
 

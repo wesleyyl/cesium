@@ -19,6 +19,18 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 
 <form action="/download" method="POST">
 	<div class="row mb-3">
+		<label for="type" class="col-sm-4 col-form-label">Model Type</label>
+		<div class="col-auto">
+			<select class="form-select" id="type" name="type" aria-label="Default select example" autocomplete="off" placeholder="">
+				<!-- <option selected>Y/N</option> -->
+				<option value="oscillator">Oscillator</option>
+				<option value="linear">Linear Chain</option>
+				<option value="c">type C</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="row mb-3">
 		<label for="num_nodes" class="col-sm-4 col-form-label">Number of Nodes:</label>
 		<div class="col-auto">
 			<input type="number" class="form-control" id="num_nodes" name="num_nodes" aria-describedby="numNodesDesc" placeholder="#" autocomplete="off">
