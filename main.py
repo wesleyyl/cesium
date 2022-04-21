@@ -42,13 +42,21 @@ def download():
       return render_template('error.html', error_msg=error) #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
 
   elif request.method == 'POST':
+    
+    #Retrieve Form Data
     form_data = request.form #this is a dictionary w/ keys & values
 
+    model_type = form_data.get("mtype")
     num_nodes = int(form_data.get("num_nodes"))
     num_reactions = int(form_data.get("num_reactions"))
     oscillator = form_data.get("oscillator")
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
+    if form_data.get("isSimulatable"):
+      telsimulatable = True
+    else:
+      telsimulatable = False
+
 
     #CONVERTS HTML FORM VALUES TO BOOLEAN
     if oscillator == "osc_yes":
@@ -80,6 +88,7 @@ def download():
       degradation_status = False
 
     queryParam = {
+      'type' : model_type,
       'nodes' : num_nodes,
       'reac' : num_reactions,
       'osc' : oscillator_status,
@@ -113,9 +122,10 @@ def download():
 @app.route("/download/<query>")
 def download_file(query):
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
+  # filename = "{}.zip".format(app.config["ZIPF_NAME"])
 
   query = json.loads(query)
-  # queryList = []
+  
 
   cesiumZip = cesiumQuery(query)
 
@@ -125,7 +135,9 @@ def download_file(query):
 
   # filename = ".".join(queryList)
 
-  return send_file(cesiumZip, attachment_filename="{}.zip".format(filename), as_attachment=True)
+
+
+  return send_file(cesiumZip, attachment_filename="{}.zip".format(app.config["ZIPF_NAME"]), as_attachment=True)
 
 
 
@@ -183,8 +195,8 @@ def cesiumQuery(query):
 
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
 
-  query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
-  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
+  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
+  query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
   model_IDS = mm.get_ids(query)
   
   if model_IDS:

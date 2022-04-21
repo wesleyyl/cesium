@@ -29,7 +29,7 @@ def startup():
     global collection
     global cur
     astr = "mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net"
-    #client = MongoClient(astr)
+    # client = MongoClient(astr)
     #MY CHANGES!!!!
     client = MongoClient(astr, tlsCAFile=ca) ###fixes the pymongo.errors.ServerSelectionTimeoutError
     database_names = client.list_database_names()
@@ -69,15 +69,16 @@ def get_connection():
 
 def get_collection_size(onlyOscillators=True):
     if onlyOscillators:
-        results = collection.find({'oscillator': True})
+        results = collection.find({'oscillator': True, 'num_nodes': 3})
         return results.count()
     else:
         return collection.count()
 
 
-def get_random_oscillator(n=1):
-    count = get_collection_size()
-    return collection.find()[randrange(count)]
+def get_random_oscillator():
+    result = query_database({'oscillator': True, 'num_nodes': 3})
+    count = collection.count_documents({'oscillator': True, 'num_nodes': 3})
+    return result[randrange(count)]
 
 def load_lines(path):
     '''
@@ -137,15 +138,18 @@ def get_nNodes(ant):
     return nNodes
 
 
-def query_database(query):
+def query_database(query, returnLength=False):
     '''
     Retrieve all entries that match the query
     :param query: A dictionary of the desired model traits
     :return: A cursor object containing the dictionaries for all matching models
     '''
-    cur = collection.find(query)
-    print(f'Found {cur.count()} matching entries.')
-    return collection.find(query)
+    length = collection.count_documents(query)
+    print(f'Found {length} matching entries.')
+    if returnLength:
+        return collection.find(query), length
+    else:
+        return collection.find(query)
 
 
 def get_ids(query):
@@ -356,6 +360,18 @@ def deleteBadModels(query, writeOut=False, destinationPath=None):
                 f.close()
     print(f'Deleted {count} of {processed} models :(')
 
+def print_attributes():
+    # Print the attributes stored for each model
+    sample_model = collection.find_one({"num_nodes": 3})
+    for key in sample_model.keys():
+        print(key)
+
+def print_random_oscillator():
+    result = query_database({"num_nodes":3, "oscillator": True})
+    i = randrange(0, result.count())
+    print(result[i]["model"])
+
 
 
 get_connection()
+

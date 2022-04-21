@@ -14,9 +14,9 @@ These can be installed via pip or conda. Alternatively, environment.yml is a con
 conda env create -f environment.yml
 conda activate oscillatorDB
  ```
- DO NOT INSTALL bson into this environment. It will break everything and you'll waste an entire day trying to fix it and then just end up re-cloning the repo. Trust me, I know. Don't think it will be a good idea to back up the database and google how to do it. Don't implent the accepted answer on StackOverflow. Don't mess with the environment. Do not do what I have done.
+<b> Note to self: </b> DO NOT INSTALL bson into this environment. It will break everything and you'll waste an entire day trying to fix it and then just end up re-cloning the repo. Trust me, I know. Don't think it will be a good idea to back up the database and google how to do it. Don't implent the accepted answer on StackOverflow. Don't mess with the environment. Do not do what I have done.
 
-You think that doesn't sound that bad? Well you also have to delete the environment and then rebuild it. And then reset your python interpreter to the new environment. Just don't do that. I'll fix it I swear.
+You think that doesn't sound that bad? Well you also have to delete the environment and then rebuild it. And then reset your python interpreter to the new environment. Just don't do that. 
 
 
 ## Database Description
@@ -35,6 +35,22 @@ The data base stores:
 
 ### Simple Queries
 Queries are specified by a dictionary containing the traits of interest. There are two query helper methods in the module to get a list of IDs or the antimony strings of models that match the query. 
+
+### General Queries - most likely this is what you want
+```import mongoMethods as mm
+
+query = {"num_nodes": 3, "oscillator": True, "Autocatalysis Present": True}
+result = mm.query_database(query)
+```
+The variable "result" is a cursor (essentially a list) containing the matching entries as dictionaries. You can iterate through the cursor as you would a list:
+```
+for model in result:
+    print(model["num_reactions"])
+```
+To view the antimony string for a model in the cursor:
+```
+print(result[0]["model"]
+```
 
 #### Get IDs
 ```
