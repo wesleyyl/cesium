@@ -1,34 +1,105 @@
 <!-- Info -->
 {% extends "base.html" %}
 {% set active_page = "" %}
-{% block title %}Cesium DB Download File{% endblock %}
+{% block title %}Cesium Database Download File{% endblock %}
 
 {% block content %}
 
-<div class="my-4" align="center">
-  <h1 align="center">Download File</h1>
+<div class="my-4 py-2 container" align="center">
+  <h1 align="center">Download Zip File</h1>
+  <br>
 
   <div class="container-download" align="center">
-    <a href="{{ url_for('download_file', query=queryJSON) }}" target="_blank"><button class='btn btn-outline-dark'>Download Zip File</button></a>
-    <br><br>
-    <a href="/" target="_self"><button class='btn btn-outline-dark'>Download Another File</button></a>
+    <a href="{{ url_for('download_file', query=queryJSON) }}" target="_blank"><button class='btn btn-primary my-2 mx-2'>Download Zip File</button></a>
+    <a href="/" target="_self"><button class='btn btn-secondary my-2 mx-2'>Download Another File</button></a>
+  </div>
+</div>
+<!-- <div class="alert alert-warning" role="alert">
+  WARNING: After selecting download, it may take a few moments for the file to download.
+</div> -->
+
+
+<!-- <div class="alert alert-warning d-flex align-items-center" role="alert">
+  <div class="spinner-border text-warning" role="status">
+    <span class="sr-only"></span>
+  </div>
+  <div>
+    WARNING: After selecting download, it may take a few moments for the file to download.
+  </div>
+</div>
+<br> -->
+
+<div class="py-4 py-2 container d-flex justify-content-center">
+  <div class="alert alert-warning d-flex align-items-center" role="alert">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+      <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </svg>
+    <div>
+      WARNING: After selecting download, it may take several moments for the zip file to download.
+    </div>
   </div>
 </div>
 
-<br>
 
-<div class="alert alert-warning" role="alert">
-  WARNING: After selecting download, it may take a few moments for the file to download.
+<div class="py-4 px-2 container">
+  <div class="py-2 row">
+    <div class="col d-flex justify-content-center">
+      <h2>Cesium Query Values:</h2>
+    </div>
+  </div>
+  <div class="py-2 row">
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Model Type: {{ query['type'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Nodes: {{ query['nodes'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Reactions: {{ query['reac'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Oscillation?: {{ query['osc'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Autocatalysis?: {{ query['autocat'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Degradation?: {{ query['degrade'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Tellurium Ready?: {{ query['simulatable'] }}</div>
+    </div>
+  </div>
 </div>
-<br>
 
-
-<div class="my-4">
-  <h2 align="center">Cesium Query Values:</h2>
-  <p> Nodes: {{ query['nodes'] }} </p>
-  <p> Reactions: {{ query['reac'] }} </p>
-  <p> Oscillation?: {{ query['osc'] }} </p>
-  <p> Autocatalysis?: {{ query['autocat'] }} </p>
-  <p> Degradation?: {{ query['degrade'] }} </p>
-</div>
+<!-- <div class="py-4 px-2 container">
+  <div class="py-2 row">
+    <div class="col d-flex justify-content-center">
+      <h2>Cesium Query Values:</h2>
+    </div>
+  </div>
+  <div class="py-2 row">
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Model Type: {{ query['type'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Nodes: {{ query['nodes'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Reactions: {{ query['reac'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Oscillation?: {{ query['osc'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Autocatalysis?: {{ query['autocat'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Degradation?: {{ query['degrade'] }}</div>
+    </div>
+    <div class="row">
+      <div class="py-2 col d-flex justify-content-center">Tellurium Ready?: {{ query['simulatable'] }}</div>
+    </div>
+  </div>
+</div> -->
 {% endblock %}

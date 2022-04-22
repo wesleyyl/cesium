@@ -1,7 +1,7 @@
 <!-- Info -->
 {% extends "base.html" %}
 {% set active_page = "index" %}
-{% block title %}Cesium DB Home{% endblock %}
+{% block title %}Cesium Database Home{% endblock %}
 
 {% block content %}
 
@@ -13,26 +13,30 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 
 -->
 
-
-<br>
-<div class="jumbotron jumbotron-fluid">
-	<div class="container">
-  		<h1 class="display-4">Cesium Database</h1>
-  		<p class="lead">A publicly available database of over 2000 chemical reaction networks.</p>
-  		<hr class="my-4">
-		<p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
+<!-- section class: can add "text-center" -->
+<section class="py-4 bg-light container-fluid">
+    <div class="row py-lg-5">
+    	<div class="col d-flex justify-content-center">
+			<div class="jumbotron jumbotron-fluid">
+				<div class="container">
+			  		<h1 class="display-4">Cesium Database</h1>
+			  		<p class="lead">A publicly available database of over 2000 chemical reaction networks.</p>
+			  		<hr class="my-4">
+					<p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+			  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
+		  		</div>
+			</div>
+		</div>
 	</div>
+</section>
+
+
+<div class="pt-4 d-flex justify-content-center container">
+	<h2 align="center">Download Reaction Network Models</h2>
 </div>
 
 
-<br>
-<h2 align="center">Download Models:</h2>
-<br>
-
-
-<div class="container d-flex justify-content-center">
-	
+<div class="px-4 py-5 d-flex justify-content-center container">
 	<form action="/download" method="POST">
 		<div class="row mb-3">
 			<label for="type" class="col-sm-4 col-form-label">Model Type</label>
@@ -41,7 +45,7 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 					<option selected>Please select</option>
 					<option value="oscillator">Oscillator</option>
 					<option value="linear">Linear Chain</option>
-					<option value="c">type C</option>
+					<option value="random">Random</option>
 				</select>
 			</div>
 		</div>
@@ -121,13 +125,14 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 			</div>
 		</div>
 
-		<div class="form-check">
-	  		<input class="form-check-input" type="checkbox" value="" id="isSimulatable">
-	 		<label class="form-check-label" for="flexCheckDefault">
-	    		Download in simulatable Tellurium form
-	  		</label>
+		<div class="row mb-3">
+			<div class="form-check">
+		  		<input class="form-check-input" type="checkbox" value="" name="isSimulatable" id="flexCheckDefault">
+		 		<label class="form-check-label" for="flexCheckDefault">
+		    		Download in simulatable Tellurium form
+		  		</label>
+			</div>
 		</div>
-
 
 		<br>
 		<div class="row">

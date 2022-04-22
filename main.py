@@ -52,10 +52,15 @@ def download():
     oscillator = form_data.get("oscillator")
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
-    if form_data.get("isSimulatable"):
-      telsimulatable = True
-    else:
-      telsimulatable = False
+    telsimulatable = "isSimulatable" in form_data
+
+
+    # if form_data.get("isSimulatable"):
+    #   telsimulatable = True
+    # else:
+    #   telsimulatable = False
+    # telsimulatable = form_data.get("isSimulatable")
+    # telsimulatable = True
 
 
     #CONVERTS HTML FORM VALUES TO BOOLEAN
@@ -64,7 +69,7 @@ def download():
     elif oscillator == "osc_no":
       oscillator_status = False
     else:
-      oscillator = "osc_no"
+      # oscillator = "osc_no"
       oscillator_status = False
 
     #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NO!
@@ -72,9 +77,8 @@ def download():
       autocatalysis_status = True
     elif autocatalysis == "autocat_no":
       autocatalysis_status = False
-
-    if autocatalysis == "Y/N":
-      autocatalysis = "autocat_no"
+    else:
+      # autocatalysis = "autocat_no"
       autocatalysis_status = False
 
     #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NO!
@@ -82,9 +86,8 @@ def download():
       degradation_status = True
     elif degradation == "degrade_no":
       degradation_status = False
-
-    if degradation == "Y/N":
-      degradation = "degrade_no"
+    else:
+      # degradation = "degrade_no"
       degradation_status = False
 
     queryParam = {
@@ -93,7 +96,8 @@ def download():
       'reac' : num_reactions,
       'osc' : oscillator_status,
       'autocat' : autocatalysis_status,
-      'degrade' : degradation_status
+      'degrade' : degradation_status,
+      'simulatable' : telsimulatable
     }
 
     # app.config["ZIPF_NAME"] = ".".join([str(num_nodes), str(num_reactions), oscillator, autocatalysis, degradation])
@@ -182,9 +186,9 @@ def faq():
 
 
 def cesiumQueryExists(query):
-  query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
-  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
-  model_IDS = mm.get_ids(query)
+  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
+  # dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
+  model_IDS = mm.get_ids(dbquery)
 
   if model_IDS:
     return True
@@ -195,9 +199,9 @@ def cesiumQuery(query):
 
   # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
 
-  # query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
-  query = { "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
-  model_IDS = mm.get_ids(query)
+  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
+  # dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
+  model_IDS = mm.get_ids(dbquery)
   
   if model_IDS:
     memZipFile = BytesIO()
@@ -205,7 +209,11 @@ def cesiumQuery(query):
       for ID in model_IDS:
         antStr = mm.get_antimony({ "ID" : ID })
         txtFilename = str(ID) + ".txt"
-        zipF.writestr(txtFilename, antStr)
+        if query["simulatable"]:
+          telStr = "import tellurium as te\n\nr = te.loada('''\n" + antStr + "\n''')\n\nm = r.simulate(0, 2, 400)\nr.plot()"
+          zipF.writestr(txtFilename, telStr)
+        else:
+          zipF.writestr(txtFilename, antStr)
     memZipFile.seek(0)
 
     return memZipFile
