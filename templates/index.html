@@ -18,129 +18,132 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
     <div class="row py-lg-5">
     	<div class="col d-flex justify-content-center">
 			<div class="jumbotron jumbotron-fluid">
-				<div class="container">
-			  		<h1 class="display-4">Cesium Database</h1>
-			  		<p class="lead">A publicly available database of over 2000 chemical reaction networks.</p>
-			  		<hr class="my-4">
-					<p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-			  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
-		  		</div>
+				<!-- <div class="container"> -->
+		  		<h1 class="display-4">Cesium Database</h1>
+		  		<p class="lead">A publicly available database of over 2000 chemical reaction networks.</p>
+		  		<hr class="my-4">
+				<p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+		  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
+		  		<!-- </div> -->
 			</div>
 		</div>
 	</div>
 </section>
 
 
-<div class="pt-4 d-flex justify-content-center container">
+<!-- <div class="pt-4 d-flex justify-content-center container">
 	<h2 align="center">Download Reaction Network Models</h2>
-</div>
+</div> -->
 
 
-<div class="px-4 py-5 d-flex justify-content-center container">
-	<form action="/download" method="POST">
-		<div class="row mb-3">
-			<label for="type" class="col-sm-4 col-form-label">Model Type</label>
-			<div class="col-auto">
-				<select class="form-select" id="mtype" name="mtype" aria-label="Default select example" autocomplete="off" placeholder="Please select">
-					<option selected>Please select</option>
-					<option value="oscillator">Oscillator</option>
-					<option value="linear">Linear Chain</option>
-					<option value="random">Random</option>
-				</select>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<label for="num_nodes" class="col-sm-4 col-form-label">Number of Nodes:</label>
-			<div class="col-auto">
-				<input type="number" class="form-control" id="num_nodes" name="num_nodes" aria-describedby="numNodesDesc" placeholder="#" autocomplete="off">
-		    	<div id="numNodesDesc" class="form-text">The number of nodes.</div>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<label for="num_reactions" class="col-sm-4 col-form-label">Number of Reactions:</label>
-			<div class="col-auto">
-				<input type="number" class="form-control" id="num_reactions" name="num_reactions" aria-describedby="numReactionsDesc" placeholder="#" autocomplete="off">
-		    	<div id="numReactionsDesc" class="form-text">The number of reactions.</div>
-			</div>
-		</div>
-
-		<fieldset class="row mb-3" autocomplete="off">
-			<legend class="col-form-label col-sm-4 pt-0">Oscillate?</legend>
-			<div class="col-auto">
-				<div class="form-check">
-					<input class="form-check-input" type="radio" name="oscillator" id="osc_yes" value="osc_yes">
-					<label class="form-check-label" for="osc_yes">
-						Yes
-					</label>
-				</div>
-				<div class="form-check">
-					<input class="form-check-input" type="radio" name="oscillator" id="osc_no" value="osc_no">
-					<label class="form-check-label" for="osc_no">
-						No
-					</label>
+<div class="py-5 container">
+	<h2 class="text-center">Reaction Network Model Query</h2>
+	<div class="pt-4 container-fluid d-flex justify-content-center">
+		<form action="/download" method="POST">
+			<div class="row mb-3">
+				<label for="type" class="col-sm-4 col-form-label">Model Type</label>
+				<div class="col-auto">
+					<select class="form-select" id="mtype" name="mtype" aria-label="Default select example" autocomplete="off" placeholder="Please select">
+						<option selected>Please select</option>
+						<option value="oscillator">Oscillator</option>
+						<option value="linear">Linear Chain</option>
+						<option value="random">Random</option>
+					</select>
 				</div>
 			</div>
-		</fieldset>
 
-		<!-- <fieldset class="row mb-3" autocomplete="off">
-			<legend class="col-form-label col-sm-2 pt-0">Oscillate?</legend>
-			<div class="col-sm-10">
-				<div class="form-check">
-					<input class="form-check-input" type="radio" name="oscillator" id="osc_yes" value="osc_yes">
-					<label class="form-check-label" for="osc_yes">
-						Yes
-					</label>
+			<div class="row mb-3">
+				<label for="num_nodes" class="col-sm-4 col-form-label">Number of Nodes:</label>
+				<div class="col-auto">
+					<input type="number" class="form-control" id="num_nodes" name="num_nodes" aria-describedby="numNodesDesc" placeholder="#" autocomplete="off">
+			    	<div id="numNodesDesc" class="form-text">The number of nodes.</div>
 				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label for="num_reactions" class="col-sm-4 col-form-label">Number of Reactions:</label>
+				<div class="col-auto">
+					<input type="number" class="form-control" id="num_reactions" name="num_reactions" aria-describedby="numReactionsDesc" placeholder="#" autocomplete="off">
+			    	<div id="numReactionsDesc" class="form-text">The number of reactions.</div>
+				</div>
+			</div>
+
+			<fieldset class="row mb-3" autocomplete="off">
+				<legend class="col-form-label col-sm-4 pt-0">Oscillate?</legend>
+				<div class="col-auto">
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="oscillator" id="osc_yes" value="osc_yes">
+						<label class="form-check-label" for="osc_yes">
+							Yes
+						</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="oscillator" id="osc_no" value="osc_no">
+						<label class="form-check-label" for="osc_no">
+							No
+						</label>
+					</div>
+				</div>
+			</fieldset>
+
+			<!-- <fieldset class="row mb-3" autocomplete="off">
+				<legend class="col-form-label col-sm-2 pt-0">Oscillate?</legend>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="oscillator" id="osc_yes" value="osc_yes">
+						<label class="form-check-label" for="osc_yes">
+							Yes
+						</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="oscillator" id="osc_no" value="osc_no">
+						<label class="form-check-label" for="osc_no">
+							No
+						</label>
+					</div> 
+				</div>
+			</fieldset> -->
+
+
+			<div class="row mb-3">
+				<label for="autocatalysis" class="col-sm-4 col-form-label">Include Autocatalysis Steps?</label>
+				<div class="col-auto">
+					<select class="form-select" id="autocat" name="autocat" aria-label="Default select example" autocomplete="off" placeholder="Please select">
+						<option selected>Please select</option>
+						<option value="autocat_yes">Yes</option>
+						<option value="autocat_no">No</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label for="degradation" class="col-sm-4 col-form-label">Include Degradation Steps?</label>
+				<div class="col-auto">
+					<select class="form-select" id="degrade" name="degrade" aria-label="Default select example" autocomplete="off" placeholder="Please select">
+						<option selected>Please select</option>
+						<option value="degrade_yes">Yes</option>
+						<option value="degrade_no">No</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="row mb-3">
 				<div class="form-check">
-					<input class="form-check-input" type="radio" name="oscillator" id="osc_no" value="osc_no">
-					<label class="form-check-label" for="osc_no">
-						No
-					</label>
-				</div> 
+			  		<input class="form-check-input" type="checkbox" value="" name="isSimulatable" id="flexCheckDefault">
+			 		<label class="form-check-label" for="flexCheckDefault">
+			    		Download in simulatable Tellurium form
+			  		</label>
+				</div>
 			</div>
-		</fieldset> -->
 
-
-		<div class="row mb-3">
-			<label for="autocatalysis" class="col-sm-4 col-form-label">Include Autocatalysis Steps?</label>
-			<div class="col-auto">
-				<select class="form-select" id="autocat" name="autocat" aria-label="Default select example" autocomplete="off" placeholder="Please select">
-					<option selected>Please select</option>
-					<option value="autocat_yes">Yes</option>
-					<option value="autocat_no">No</option>
-				</select>
+			<br>
+			<div class="row">
+				<div class="col-sm-10 text-center">
+					<button type="submit" class="btn btn-primary">Download Models</button>
+				</div>
 			</div>
-		</div>
-
-		<div class="row mb-3">
-			<label for="degradation" class="col-sm-4 col-form-label">Include Degradation Steps?</label>
-			<div class="col-auto">
-				<select class="form-select" id="degrade" name="degrade" aria-label="Default select example" autocomplete="off" placeholder="Please select">
-					<option selected>Please select</option>
-					<option value="degrade_yes">Yes</option>
-					<option value="degrade_no">No</option>
-				</select>
-			</div>
-		</div>
-
-		<div class="row mb-3">
-			<div class="form-check">
-		  		<input class="form-check-input" type="checkbox" value="" name="isSimulatable" id="flexCheckDefault">
-		 		<label class="form-check-label" for="flexCheckDefault">
-		    		Download in simulatable Tellurium form
-		  		</label>
-			</div>
-		</div>
-
-		<br>
-		<div class="row">
-			<div class="col-sm-10 text-center">
-				<button type="submit" class="btn btn-primary">Download Models</button>
-			</div>
-		</div>
-	</form>
+		</form>
+	</div>
 </div>
 
 

@@ -6,7 +6,8 @@
 {% block content %}
 
 <div class="my-4 py-2 container" align="center">
-  <h1 align="center">Download Zip File</h1>
+  <h1 class="text-center">Download Zip File</h1>
+  <!-- <h1 align="center">Download Zip File</h1> -->
   <br>
 
   <div class="container-download" align="center">
@@ -29,7 +30,7 @@
 </div>
 <br> -->
 
-<div class="py-4 py-2 container d-flex justify-content-center">
+<div class="container d-flex justify-content-center">
   <div class="alert alert-warning d-flex align-items-center" role="alert">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
       <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
@@ -41,35 +42,23 @@
 </div>
 
 
-<div class="py-4 px-2 container">
-  <div class="py-2 row">
-    <div class="col d-flex justify-content-center">
-      <h2>Cesium Query Values:</h2>
+<div class="my-1 container-fluid d-flex justify-content-center">
+  <div class="py-2 row-mb-3 justify-content-center">
+    <div class="my-3 col d-flex justify-content-center">
+      <!-- <h3>Cesium Query Values</h3> -->
+      <h2 class="text-center">Cesium Query Values</h2>
     </div>
-  </div>
-  <div class="py-2 row">
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Model Type: {{ query['type'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Nodes: {{ query['nodes'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Reactions: {{ query['reac'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Oscillation?: {{ query['osc'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Autocatalysis?: {{ query['autocat'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Degradation?: {{ query['degrade'] }}</div>
-    </div>
-    <div class="row">
-      <div class="py-2 col d-flex justify-content-center">Tellurium Ready?: {{ query['simulatable'] }}</div>
-    </div>
-  </div>
+    <!-- <div class="col w-100 d-flex justify-content-center bg-secondary"> -->
+      <ul class="list-group bg-transparent">
+        <li class="list-group-item bg-transparent">Model Type: {{ query['type'] }}</li>
+        <li class="list-group-item bg-transparent">Nodes: {{ query['nodes'] }}</li>
+        <li class="list-group-item bg-transparent">Reactions: {{ query['reac'] }}</li>
+        <li class="list-group-item bg-transparent">Oscillation?: {{ query['osc'] }}</li>
+        <li class="list-group-item bg-transparent">Autocatalysis?: {{ query['autocat'] }}</li>
+        <li class="list-group-item bg-transparent">Degradation?: {{ query['degrade'] }}</li>
+        <li class="list-group-item bg-transparent">Tellurium Ready?: {{ query['simulatable'] }}</li>
+      </ul>
+  <!-- </div> -->
 </div>
 
 <!-- <div class="py-4 px-2 container">
