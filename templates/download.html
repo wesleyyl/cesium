@@ -46,19 +46,22 @@
   <div class="py-2 row-mb-3 justify-content-center">
     <div class="my-3 col d-flex justify-content-center">
       <!-- <h3>Cesium Query Values</h3> -->
-      <h2 class="text-center">Cesium Query Values</h2>
+      <h2 class="text-center">Cesium Query Results</h2>
+    </div>
+    <div class="my-1 col d-flex justify-content-center">
+      <p class="fw-bold">Number of Models Found: {{ numModels }}</p>
     </div>
     <!-- <div class="col w-100 d-flex justify-content-center bg-secondary"> -->
       <ul class="list-group bg-transparent">
         <li class="list-group-item bg-transparent">Model Type: {{ query['type'] }}</li>
         <li class="list-group-item bg-transparent">Nodes: {{ query['nodes'] }}</li>
         <li class="list-group-item bg-transparent">Reactions: {{ query['reac'] }}</li>
-        <li class="list-group-item bg-transparent">Oscillation?: {{ query['osc'] }}</li>
+        <!-- <li class="list-group-item bg-transparent">Oscillation?: {{ query['osc'] }}</li> -->
         <li class="list-group-item bg-transparent">Autocatalysis?: {{ query['autocat'] }}</li>
         <li class="list-group-item bg-transparent">Degradation?: {{ query['degrade'] }}</li>
         <li class="list-group-item bg-transparent">Tellurium Ready?: {{ query['simulatable'] }}</li>
       </ul>
-  <!-- </div> -->
+  </div>
 </div>
 
 <!-- <div class="py-4 px-2 container">

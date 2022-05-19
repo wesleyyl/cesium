@@ -13,6 +13,7 @@ from zipfile import ZipFile
 from io import BytesIO
 import os
 import json #to convert string to dictionary
+import random #for filename
 # import base64
 
 
@@ -23,7 +24,7 @@ mm.startup()
 
 #Config Values
 # app.config["DOWNLOAD_FOLDER"] = 'download'
-app.config["ZIPF_NAME"] = "cesium-download" #default value to be changed
+# app.config["ZIPF_NAME"] = "cesium-download" #default value to be changed
 
 
 #Index Page
@@ -39,7 +40,7 @@ def index():
 def download():
   if request.method == 'GET':
       error = "No query data submitted. Please submit query data through the form page."
-      return render_template('error.html', error_msg=error) #ADD A PAGE THAT REDIRECTS BACK TO THE HOME PAGE (html page)
+      return render_template('error.html', error_msg=error)
 
   elif request.method == 'POST':
     
@@ -47,71 +48,64 @@ def download():
     form_data = request.form #this is a dictionary w/ keys & values
 
     model_type = form_data.get("mtype")
-    num_nodes = int(form_data.get("num_nodes"))
-    num_reactions = int(form_data.get("num_reactions"))
-    oscillator = form_data.get("oscillator")
+    num_nodes = form_data.get("num_nodes")
+    num_reactions = form_data.get("num_reactions")
+    # oscillator = form_data.get("oscillator")
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
     telsimulatable = "isSimulatable" in form_data
 
+    if num_nodes != "": #num_nodes is not None
+      num_nodes = int(num_nodes)
+    else:
+      num_nodes = None
 
-    # if form_data.get("isSimulatable"):
-    #   telsimulatable = True
-    # else:
-    #   telsimulatable = False
-    # telsimulatable = form_data.get("isSimulatable")
-    # telsimulatable = True
+    if num_reactions != "": #why doesn't it default to None if no values found?!
+      num_reactions = int(num_reactions)
+    else:
+      num_reactions = None
 
 
     #CONVERTS HTML FORM VALUES TO BOOLEAN
-    if oscillator == "osc_yes":
-      oscillator_status = True
-    elif oscillator == "osc_no":
-      oscillator_status = False
-    else:
-      # oscillator = "osc_no"
-      oscillator_status = False
+    # if oscillator == "osc_yes":
+    #   oscillator_status = True
+    # elif oscillator == "osc_no":
+    #   oscillator_status = False
+    # else:
+    #   # oscillator = "osc_no"
+    #   oscillator_status = False
 
-    #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NO!
+    #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NONE
     if autocatalysis == "autocat_yes":
       autocatalysis_status = True
     elif autocatalysis == "autocat_no":
       autocatalysis_status = False
     else:
-      # autocatalysis = "autocat_no"
-      autocatalysis_status = False
+      autocatalysis_status = None
 
-    #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NO!
+    #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NONE
     if degradation == "degrade_yes":
       degradation_status = True
     elif degradation == "degrade_no":
       degradation_status = False
     else:
-      # degradation = "degrade_no"
-      degradation_status = False
+      degradation_status = None
 
     queryParam = {
       'type' : model_type,
       'nodes' : num_nodes,
       'reac' : num_reactions,
-      'osc' : oscillator_status,
+      # 'osc' : oscillator_status,
       'autocat' : autocatalysis_status,
       'degrade' : degradation_status,
       'simulatable' : telsimulatable
     }
 
-    # app.config["ZIPF_NAME"] = ".".join([str(num_nodes), str(num_reactions), oscillator, autocatalysis, degradation])
-
-
-    # cesiumZip = cesiumQuery(queryParam)
-
-    # encoded_zipF = base64.b64encode(cesiumZip.getvalue())
-
 
     #DEBUG CODE: TO LOAD PAGE WITH QUERY VALUES UNDERNEATH
-    if cesiumQueryExists(queryParam):
-      return render_template('download.html', query=queryParam, queryJSON=json.dumps(queryParam))
-    elif not cesiumQueryExists(queryParam):
+    if cesiumQueryExists(queryParam) > 0:
+      return render_template('download.html', query=queryParam, queryJSON=json.dumps(queryParam), numModels=cesiumQueryExists(queryParam))
+    elif cesiumQueryExists(queryParam) == 0:
       error = "No models found. Please try a different query."
       return render_template('error.html', error_msg=error)
     elif status == -1:
@@ -125,23 +119,17 @@ def download():
 #Download File Page
 @app.route("/download/<query>")
 def download_file(query):
-  # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
-  # filename = "{}.zip".format(app.config["ZIPF_NAME"])
-
   query = json.loads(query)
-  
+
+  numOfModels = cesiumQueryExists(query)
+  randInt = random.randint(1000000, 9999999)
+  filename = "{}.zip".format("cesium-models-" + str(numOfModels) + "-" + str(randInt))
 
   cesiumZip = cesiumQuery(query)
 
 
-  # for param in queryDict.values():
-  #   queryList.append(str(param))
 
-  # filename = ".".join(queryList)
-
-
-
-  return send_file(cesiumZip, attachment_filename="{}.zip".format(app.config["ZIPF_NAME"]), as_attachment=True)
+  return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
 
 
 
@@ -185,22 +173,30 @@ def faq():
   return render_template('faq.html')
 
 
+#Returns number of models in query if it exists. Otherwise it returns 0.
 def cesiumQueryExists(query):
-  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
-  # dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
+
+  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
+
+  for key in list(dbquery.keys()):
+    if dbquery[key] is None:
+      del dbquery[key]
+
   model_IDS = mm.get_ids(dbquery)
 
   if model_IDS:
-    return True
+    return len(model_IDS)
   else:
-    return False
+    return 0
 
 def cesiumQuery(query):
 
-  # filepath = os.path.join(app.config["DOWNLOAD_FOLDER"], app.config["ZIPF_NAME"])
+  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
 
-  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"] }
-  # dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "oscillator" : query["osc"], "Autcatalysis Present": query["autocat"] }
+  for key in list(dbquery.keys()):
+    if dbquery[key] is None:
+      del dbquery[key]
+ 
   model_IDS = mm.get_ids(dbquery)
   
   if model_IDS:
