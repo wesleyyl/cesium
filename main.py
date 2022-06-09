@@ -167,10 +167,10 @@ def about():
   return render_template('about.html')
 
 
-#FAQ Page
-@app.route("/faq")
-def faq():
-  return render_template('faq.html')
+# #FAQ Page
+# @app.route("/faq")
+# def faq():
+#   return render_template('faq.html')
 
 
 #Returns number of models in query if it exists. Otherwise it returns 0.
