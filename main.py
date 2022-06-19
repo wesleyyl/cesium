@@ -19,7 +19,7 @@ import random #for filename
 
 #Initializing Flask app and mongoMethods Startup
 app = Flask(__name__, static_folder = 'static')
-mm.startup()
+# mm.startup()
 
 
 #Config Values
@@ -30,7 +30,8 @@ mm.startup()
 #Index Page
 @app.route("/")
 def index():
-    return render_template('index.html')
+    types = mm.get_model_types()
+    return render_template('index.html', types=types)
 
 #Download Transition Page
 # 

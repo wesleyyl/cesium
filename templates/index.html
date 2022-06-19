@@ -22,7 +22,8 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 		  		<h1 class="display-4">Cesium Database</h1>
 		  		<p class="lead">A database of over 2000 evolved reaction networks.</p>
 		  		<hr class="my-4">
-				<p>TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT</p>
+				<!-- <p>Sauro Lab</p> -->
+				<!-- <p id="test">Test</p> -->
 		  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
 		  		<!-- </div> -->
 			</div>
@@ -41,14 +42,16 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 	<div class="pt-4 container-fluid d-flex justify-content-center">
 		<form action="/download" method="POST" novalidate>
 			<div class="row mb-3">
-				<label for="type" class="col-sm-4 col-form-label">Model Type</label>
+				<label for="type" class="col-sm-4 col-form-label text-danger">Model Type*</label>
 				<div class="col-auto">
 					<select class="form-select" id="mtype" name="mtype" aria-label="Default select example" autocomplete="off" placeholder="Please select" required>
 						<option selected>Please select</option>
-						<option value="oscillator">Oscillator</option>
+						<!-- <option value="oscillator">{{ types[0] }}</option> -->
+						<!-- <option value="oscillator">Oscillator</option>
 						<option value="linear">Linear Chain</option>
-						<option value="random">Random</option>
+						<option value="random">Random</option> -->
 					</select>
+					
 				</div>
 			</div>
 
@@ -133,6 +136,8 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 			 		<label class="form-check-label" for="flexCheckDefault">
 			    		Download in simulatable Tellurium form
 			  		</label>
+			  		<br>
+			  		<p>(include Tellurium syntax with text files)</p>
 				</div>
 			</div>
 
@@ -145,6 +150,21 @@ name is what you refer to in Python Flask. It is what is used as the key in Flas
 		</form>
 	</div>
 </div>
+
+<script>
+	// document.getElementById("test").innerHTML = {{ types | tojson }};
+	var mtype = document.getElementById("mtype"),
+		arr = {{ types | tojson }};
+		// arr = ["hello", "bye"];
+
+	for(var i = 0; i < arr.length; i++) {
+		var option = document.createElement("OPTION"),
+			txt = document.createTextNode(arr[i]);
+		option.appendChild(txt);
+		option.setAttribute("value",arr[i]);
+		mtype.insertBefore(option,mtype.lastChild);
+	}
+</script>
 
 
 {% endblock %}

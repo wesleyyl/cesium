@@ -1,5 +1,101 @@
 # oscillatorDB
 
+## Table of Contents
+- [oscillatorDB](#oscillatordb)
+  * [Recent Updates (2022-05-27)](#recent-updates--2022-05-27-)
+    + [The "modelType" field](#the--modeltype--field)
+      - [Example - modelType Field:](#example---modeltype-field-)
+    + [New add_model method](#new-add-model-method)
+  * [Set Up](#set-up)
+  * [Database Schema](#database-schema)
+  * [Queries](#queries)
+    + [Simple Queries](#simple-queries)
+    + [General Queries - most likely this is what you want](#general-queries---most-likely-this-is-what-you-want)
+      - [Get IDs](#get-ids)
+      - [Get antimony strings](#get-antimony-strings)
+      - [Get SBML files](#get-sbml-files)
+    + [Custom Queries](#custom-queries)
+  * [Adding to Database](#adding-to-database)
+    + [Adding a Single Model](#adding-a-single-model)
+    + [Adding en Masse (USE CAUTION)](#adding-en-masse--use-caution-)
+        * [Example - Adding Models en Masse:](#exampel---adding-models-en-masse-)
+
+
+
+## Recent Updates (2022-05-27)
+* All unused or redundant fields have been removed. 
+* The field "oscillator" has been removed. To find oscillators, use "modelType": "oscillator"
+* There is now a predifined list of possible modelTypes: "oscillator" or "random" (see below)
+* There is a new method to add a single model called ```add_model(antString, modelType)``` (see below)
+    
+
+### The "modelType" field
+There is now a defined set of possible model types for the field modelType. Currently these are "oscillator" and "random".
+
+#### Example - modelType Field: 
+<b>Get a list of the current model types:</b>
+
+Input:
+```
+import mongoMethods as mm
+mm.get_model_types()
+```
+Output:
+```
+['oscillator', 'random']
+```
+<b>Add a new model type:</b>
+
+```
+mm.add_model_type('bistable')
+```
+
+
+### New add_model method
+* ```add_model(antString, modelType)```
+* Arguments: antString - The antimony string for the model to be added
+                 modelType - (string) model type from list of current model types
+* Optional args: 
+   * ID: (str) model's ID, populated automatically if left blank
+   * num_nodes: (int) the number of species, populated automatically if left blank
+   * num_reactions: (int) the number of reactions, populated automatically if left blank
+   * addReactionProbabilites: int list, the probability of adding each reaction type:
+       uni-uni, uni-bi, bi-uni, bi-bi
+   * initialProbabilites: int list, the initial probability of adding each reaction type when generating a
+       random network: uni-uni, uni-bi, bi-uni, bi-bi
+   * autocatalysisPresent: boolean, True if there is an autocatalytic reaction
+   * degradationPresent: boolean, True if there is a degradation reaction
+
+The antimony string must be formatted as follows:
+```
+antimony_string = '''
+var S0                        # Species must be declared first using 'var' or 'ext' (getting the correct num_nodes count depends on this!)
+var S1
+var S2
+S1 -> S1+S0; k0*S1      
+S2 + S0 -> S0; k1*S2*S0
+S2 -> S2+S1; k2*S2
+S0 -> S1; k3*S0
+S1 -> S2; k4*S1
+S2 -> S2+S2; k5*S2
+k0 = 2.58                     # Rate constants must start with "k"
+k1 = 25.10                    # The number of rate constants must equal the number of reactions
+k2 = 5.69
+k3 = 12.40
+k4 = 28.62
+k5 = 63.57
+S0 = 1.0
+S1 = 5.0
+S2 = 9.0'''
+```
+Adding the new model:
+```
+mm.add_model(antimony_string, "oscillator", num_nodes=3, num_reactions=6, autocatalysis=True)
+```
+If left blank, the fields ID, num_nodes, and num_reactions will automatically be populated. Any other optional arguments that are left blank will be None.
+
+It's helpful to put all known info into the optional arguments and leave as few blanks as possible, but in the future I will restructure stuff so you can analyze the reactions from here.
+
 ## Set Up
 Clone this repository:
 ```git clone https://github.com/really-lilly/oscillatorDB.git```
@@ -14,21 +110,26 @@ These can be installed via pip or conda. Alternatively, environment.yml is a con
 conda env create -f environment.yml
 conda activate oscillatorDB
  ```
-<b> Note to self: </b> DO NOT INSTALL bson into this environment. It will break everything and you'll waste an entire day trying to fix it and then just end up re-cloning the repo. Trust me, I know. Don't think it will be a good idea to back up the database and google how to do it. Don't implent the accepted answer on StackOverflow. Don't mess with the environment. Do not do what I have done.
-
-You think that doesn't sound that bad? Well you also have to delete the environment and then rebuild it. And then reset your python interpreter to the new environment. Just don't do that. 
+<b> Note to self: </b> DO NOT INSTALL bson into this environment. 
 
 
-## Database Description
+## Database Schema
+Also available via ```print_schema()```
 
 The data base stores:
 * ID: model's ID number (str)
 * num_nodes: number of species (int)
 * num_reactions: number of reactions (int)
 * model: antimony string for the model
-* oscillator: If the model oscillates or not (boolean). True if does, False if it does not. 
-    * Models are filtered so none go to infinity
-* mass_conserved: True if there are no reactions that violate mass conservation (eg. A + B -> A). False otherwise
+* modelType: eg. "oscillator" or "random" (str)
+* combinedReactions: identical reactions that were fused in post-processing (list of strings)
+* deletedReactions: reactions that were not needed for oscillation and removed (list of strings)
+* reactionCounts: Tally for different reaction types: Uni-Uni, Uni-Bi, Bi-Uni, Bi-Bi, Degradation, Autocatalysis, Total (dict)
+* Autocatalysis Present: True if an autocatalytic reaction is present (boolean)
+* Degradation Present: True if a degradation reaction is present (boolean)
+* addReactionProbabilities: The probability of adding each reaction type <b>during evolution</b>: uni-uni, uni-bi, bi-uni, bi-bi (eg. [0.25, 0.25, 0.25,0.25]) (list of floats)
+* initialProbabilities: The probability of adding each reaction type <b>during the initial random generation</b>, uni-uni, uni-bi, bi-uni, bi-bi (eg. [0.25, 0.25, 0.25,0.25]) (list of floats)
+
 
 
 ## Queries
@@ -96,71 +197,47 @@ for model in models:
     print(model['num_reactions'])
 ```
 
-The collection can also be directly queried after directly connecting to the database collection
+## Adding to Database 
+### Adding a Single Model
+(copied from recent updates)
+* ```add_model(antString, modelType)```
+* Arguments: antString - The antimony string for the model to be added
+             modelType - (string) model type from list of current model types
+* Optional args: 
+ * ID: (str) model's ID, populated automatically if left blank
+ * num_nodes: (int) the number of species, populated automatically if left blank
+ * num_reactions: (int) the number of reactions, populated automatically if left blank
+ * addReactionProbabilites: int list, the probability of adding each reaction type:
+     uni-uni, uni-bi, bi-uni, bi-bi
+ * initialProbabilites: int list, the initial probability of adding each reaction type when generating a
+     random network: uni-uni, uni-bi, bi-uni, bi-bi
+ * autocatalysisPresent: boolean, True if there is an autocatalytic reaction
+ * degradationPresent: boolean, True if there is a degradation reaction
+
+The antimony string must be formatted as follows:
 ```
-import mongoMethods as mm
-
-# Connect to the database collection
-collection = mm.collection
-
-# Get oscillators with 3 nodes and 5 reactions
-query = { "num_nodes" : 3, "num_reactions" : 5, "oscillator" : True }
-entries = collection.find(query)
-
-# Get the IDs of models that match the query
-for entry in entries:
-    print(entry['ID'])
-```
-
-## Adding to Database
-
-New models can be added en masse provided that all antimony files are stored in a single folder. You will also need to provide the oscillation status (True, False). The number of nodes/species will automatically be counted provided that the antimony file starts with listing the species as shown below. 
-'''
-var S0
+antimony_string = '''
+var S0                        # Species must be declared first using 'var' or 'ext' (getting the correct num_nodes count depends on this!)
 var S1
-#etc
-'''
-This will also work if the first line is a comment. If your antimony file does not have this information, the number of nodes can be manually provided with the option argument "num_nodes"
-
-**NOTE: There is currently no safeguard to prevent adding duplicate models to the database. Running the same add_many command twice will duplicate the models previously added.**
-
-##### EXAMPLE: 
-Add oscillating networks from the folder ant_folder
+var S2
+S1 -> S1+S0; k0*S1      
+S2 + S0 -> S0; k1*S2*S0
+S2 -> S2+S1; k2*S2
+S0 -> S1; k3*S0
+S1 -> S2; k4*S1
+S2 -> S2+S2; k5*S2
+k0 = 2.58                     # Rate constants must start with "k"
+k1 = 25.10                    # The number of rate constants must equal the number of reactions
+k2 = 5.69
+k3 = 12.40
+k4 = 28.62
+k5 = 63.57
+S0 = 1.0
+S1 = 5.0
+S2 = 9.0'''
 ```
-import mongoMethods as mm
-
-
-path = "/home/user/ant_folder"
-
-# True indicates oscillating model
-mm.add_many(path, True, num_nodes=3)   #add_many(path, oscillator, massConserved, num_nodes=None)
+Adding the new model:
 ```
-
-It may be necessary to delete models from the database if they've been erroneously added. **Be catious**, deleting models is permanent and effects the entire database.
-
-##### EXAMPLE:
-Let's say that in the previous example, we added antimony models to the database from the folder ant_folders, but they were erroneously added as oscillators when they are not. We can delete all the models that are stored in the local folder from the database and then re-add them with the correct oscillation status.
+mm.add_model(antimony_string, "oscillator", num_nodes=3, num_reactions=6, autocatalysis=True)
 ```
-import mongoMethods as mm
-
-connection = mm.get_connection()
-path = "C:\\Users\\user\\ant_folder"
-
-# Remove the models
-mm.delete_by_path(path)
-
-# Re-add the models with the correct oscillator status
-mm.add_many(path, False)
-```
-Models can also be deleted by query. This is useful if you want to delete a specific model. For example, the model 12345 can be deleted by
-```mm.delete_by_query({ 'ID' : '12345' })```
-Please be careful when deleting by query. If your query is not specific enough, you may end up permanently deleting other models from the database as well.
-
-## What's in the database
-Last updated 2021-07-15
-
-* 10 node oscillators
-* 10 node controls (non-oscillators)
-* 3 node oscillators
-* 3 node controls
-
+If left blank, the fields ID, num_nodes, and num_reactions will automatically be populated. Any other optional arguments that are left blank will be None.

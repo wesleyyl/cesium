@@ -3,40 +3,140 @@ from pymongo import MongoClient
 import warnings
 from random import randrange
 import tellurium as te
-
-###Fixes the pymongo.errors.ServerSelectionTimeoutError => references installed certificate authority bundle
-import certifi
-ca = certifi.where()
+from random import randint
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-###Initialization of variables
-astr = ""
-client = ""
-database_names = ""
-db = ""
-collection = ""
-cur = ""
-
-###Startup function so we don't autmoatically call upon the db
 # user: data
 # pwd:  VuRWQ
-def startup():
-    global astr
-    global client
-    global database_names
-    global db
-    global collection
-    global cur
-    astr = "mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net"
-    # client = MongoClient(astr)
-    #MY CHANGES!!!!
-    client = MongoClient(astr, tlsCAFile=ca) ###fixes the pymongo.errors.ServerSelectionTimeoutError
-    database_names = client.list_database_names()
-    db = client['networks']
-    db = client.networks
-    collection = db['networks']
-    cur = collection.find({})
+astr = "mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net"
+client = MongoClient(astr)
+database_names = client.list_database_names()
+db = client['networks']
+db = client.networks
+collection = db['networks']
+cur = collection.find({})
+
+'''
+CURRENT OPTIONS FOR modelType field:
+"oscillator"
+"random" - refers to random models used for controls
+
+You can update this list here or use the add_model_type function. 
+NOTE that this list is NOT attached to the database, so unless you push these changes, the database won't 'know'
+about this list and what types of models it has.
+'''
+
+def get_model_types():
+    '''
+    Get the current options for the modelType field
+    :param printTypes: optional, boolean, prints the types if True
+    :return: A list of possible model types (strings)
+    '''
+    r = query_database({}, printSize=False)
+    return r[0]["allModelTypes"]
+
+def add_model_type(newType):
+    '''
+    Add a new option for the modelType field
+    :param newType: name of new type (string)
+    '''
+    allModelTypes = get_model_types()
+    if newType in allModelTypes:
+        print("This modelType already exists.")
+        return
+    allModelTypes.append(newType)
+    try:
+        collection.update_many({}, {'$set': {'allModelTypes': allModelTypes}})
+        print("Successfully updated ")
+    except:
+        print("An error occurred. Model type not added.")
+
+def generate_ID(n=19):
+    '''
+    Generate a random ID number that is not already in the database
+    :param n: the number of digits in the ID
+    :return: the ID number (string)
+    '''
+    ID = ''.join(["{}".format(randint(0, 9)) for num in range(0, 19)])
+    _, length = query_database({"ID": ID}, returnLength=True, printSize=False)
+    while length > 0:
+        ID = ''.join(["{}".format(randint(0, 9)) for num in range(0, n)])
+        _, length = query_database({"ID": ID}, returnLength=True, printSize=False)
+    return ID
+
+
+def is_valid_ant_string(antString):
+    '''
+    A basic test to assess if an antimony string is in the correct format for future processing
+    :param antString: (str) antimony string to test
+    :return: boolean, True if valid
+    '''
+    if antString.startswith('#'):
+        antString = antString.split('\n')[1:]
+    else:
+        antString = antString.split('\n')
+    if not (antString[0].startswith('var') or antString[0].startswith('ext')):
+        raise Exception("Invalid antimony string: Species must be defined first using 'var' or 'ext'\n")
+    k_tally = 0
+    reaction_tally = 0
+    for line in antString:
+        if line.startswith("k"):
+            k_tally += 1
+        elif not (line.startswith("k") or line.startswith('var') or line.startswith('ext')):
+            reaction_tally += 1
+    if k_tally != reaction_tally:
+        raise Exception("Invalid antimony string: the number of reactions and rate constants is not equal.\n")
+    return True
+
+
+def add_model(antString, modelType, ID=None, num_nodes=None, num_reactions=None, addReactionProbabilites=None,
+              initialProbabilites=None, autocatalysisPresent=None, degradationPresent=None):
+    '''
+    Add a single new model to the database
+    :param antString: (str) antimony string to be added
+    :param modelType: (str) what type of model it is, eg. "oscillator"
+    Optional args:
+    :param ID: (str) model's ID
+    :param num_nodes: (int) the number of species
+    :param num_reactions: (int) the number of reactions
+    :param addReactionProbabilites: int list, the probability of adding each reaction type:
+        uni-uni, uni-bi, bi-uni, bi-bi
+    :param initialProbabilites: int list, the initial probability of adding each reaction type when generating a
+        random network: uni-uni, uni-bi, bi-uni, bi-bi
+    :param autocatalysisPresent: boolean, True if there is an autocatalytic reaction
+    :param degradationPresent: boolean, True if there is a degradation reaction
+    :param analyzeReactions:
+    '''
+    if not is_valid_ant_string(antString):
+        return
+    if modelType not in get_model_types():
+        raise Exception(f"'{modelType}' is not a valid modelType.\nDouble check spelling or add a new modelType with "
+                        f"'add_model_type('{modelType}')'\n")
+    _, length = query_database({"ID": ID}, returnLength=True, printSize=False)
+    if length > 0: # Check if the ID is a duplicate
+        raise Exception(f"Unable to add model. A model with the ID {ID} already exists.\n")
+    if not ID:
+        ID = generate_ID()
+    if not num_nodes:
+        num_nodes = get_nNodes(antString)
+    if not num_reactions:
+        num_reactions = get_nReactions(antString)
+    modelDict = {'ID': ID,
+                 'modelType': modelType,
+                 'num_nodes': num_nodes,
+                 'num_reactions': num_reactions,
+                 'model': antString,
+                 'addReactionProbabilities': addReactionProbabilites,
+                 'initialProbabilities': initialProbabilites,
+                 'Autocatalysis Present': autocatalysisPresent,
+                 'degradation Present': degradationPresent
+                 }
+    try:
+        collection.insert_one(modelDict)
+        print("Model successfully added")
+    except:
+        print("Something went wrong. Unable to add model.")
 
 
 def print_entries(cursor=cur, n=None):
@@ -59,54 +159,10 @@ def print_entries(cursor=cur, n=None):
                 break
 
 
-def get_connection():
-    '''
-    Connect to the mongoDB
-    :return: a MongoClient object connected to the database
-    '''
-    return MongoClient("mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net")
-
-
-def get_collection_size(onlyOscillators=True):
-    if onlyOscillators:
-        results = collection.find({'oscillator': True, 'num_nodes': 3})
-        return results.count()
-    else:
-        return collection.count()
-
-
 def get_random_oscillator():
     result = query_database({'oscillator': True, 'num_nodes': 3})
     count = collection.count_documents({'oscillator': True, 'num_nodes': 3})
     return result[randrange(count)]
-
-def load_lines(path):
-    '''
-    Load an antimony model from a local machine split into lines
-    :param path: path to the .ant file
-    :return: Returns the antimony test as a list of strings. Omits the first line if it is a comment.
-    '''
-    with open(path, "r") as f:
-        ant = f.read()
-        f.close()
-    lines = ant.split('\n')
-    # First line is comment for fitness, ignore
-    if lines[0].startswith('#'):
-        lines = lines[1:]
-    return lines
-
-
-def load_antimony(path):
-    '''
-    Load an antimony model from a local machine split into lines
-    :param path: path to the .ant file
-    :return: a single antimony string for the model. Includes all lines including comments.
-    '''
-    # THIS WILL INCLUDE THE FIRST COMMENTED LINE!
-    with open(path, "r") as f:
-        ant = f.read()
-        f.close()
-    return ant
 
 
 def get_nReactions(ant):
@@ -138,14 +194,17 @@ def get_nNodes(ant):
     return nNodes
 
 
-def query_database(query, returnLength=False):
+def query_database(query, returnLength=False, printSize=True):
     '''
-    Retrieve all entries that match the query
+    Retrieve all entries that match the query.
     :param query: A dictionary of the desired model traits
+    returnLength: boolean, also returns the number of results if True
+    printSize: boolean, prints number of results if True
     :return: A cursor object containing the dictionaries for all matching models
     '''
     length = collection.count_documents(query)
-    print(f'Found {length} matching entries.')
+    if printSize:
+        print(f'Found {length} matching entries.')
     if returnLength:
         return collection.find(query), length
     else:
@@ -167,9 +226,7 @@ def get_ids(query):
         return None
     return result
 
-def update_model(query, update):
-    newValue = {"$set" : update}
-    collection.update_one(query, newValue)
+
 
 
 def get_model_by_id(id):
@@ -219,101 +276,6 @@ def yes_or_no(question):
             print('Please answer y or n.')
 
 
-def add_many(path, oscillator, massConserved, num_nodes=None):
-    '''
-    Add several antimony models to the database from a local folder containing .ant files.
-    :param path: Path to the folder where the antimony models are located.
-    :param oscillator: Oscillation status. True for oscillator, False for non oscillator (booleans), or 'damped' (str)
-    :return: None
-    '''
-    if not os.path.exists(path):
-        raise ValueError("Invalid path")
-    modelList = []
-    os.chdir(path)
-    for filename in os.listdir(path):
-        if not filename.endswith('.ant') or os.path.isdir(filename):
-            continue
-        ant_lines = load_lines(filename)
-        nReactions = get_nReactions(ant_lines)
-        if not num_nodes:
-            nNodes = get_nNodes(ant_lines)
-        else:
-            nNodes = num_nodes
-        ant = load_antimony(filename)
-
-        if filename.startswith('FAIL_Model_'):
-            ID = filename[11:-4]
-        elif filename.startswith('Model_'):
-            ID = filename[6:-4]
-        elif filename.endswith('.ant'):
-            ID = filename[:-4]
-        else:
-            ID = filename
-        if not (oscillator == True or oscillator == False or oscillator == 'damped'):
-            raise ValueError("Oscillator argument must be True, False, or 'damped'")
-        modelDict = {'ID': ID,
-                     'num_nodes': nNodes,
-                     'num_reactions': nReactions,
-                     'model': ant,
-                     'oscillator': oscillator,
-                     'mass_conserved' : massConserved}
-        modelList.append(modelDict)
-    collection.insert_many(modelList)
-    print(f"Successfully added {len(modelList)} models to database")
-
-
-def add_ant_extension(path):
-    os.chdir(path)
-    count = 0
-    for filename in os.listdir(path):
-        os.rename(filename, filename[:-4])
-        count += 1
-    print(f'Successfully added .ant extension to {count} files')
-
-
-def delete_by_query(query, yesNo=True):
-    '''
-    Delete models that match the query from the database
-    :param query: A dictionary with the target traits of models to be deleted.
-    :return: None
-    '''
-    if query == {}:
-        print('Deleting the entire database is not allowed.')
-        return None
-    if yesNo:
-        proceed = yes_or_no(f"Are you sure you want to delete all models that math the query {str(query)}?")
-        if proceed:
-            collection.delete_many(query)
-            print(f"Successfully deleted models matching the query {str(query)}")
-    else:
-        collection.delete_many(query)
-
-
-
-def delete_by_path(path):
-    '''
-    Delete models from the database that match models in a local folder.
-    This is useful if models from a local folder were incorrectly or inadvertently added to the database.
-    :param path: Path to local folder where the .ant files are located.
-    :return: None
-    '''
-    if not os.path.exists(path):
-        raise ValueError('Invalid path.')
-    os.chdir(path)
-    count = 0
-    for filename in os.listdir(path):
-        if filename.endswith('.ant'):
-            if filename.startswith('FAIL_Model_'):
-                ID = filename[11:-4]
-            elif filename.startswith('Model_'):
-                ID = filename[6:-4]
-            else:
-                ID = filename[-4]
-            collection.delete_one({'ID': ID})
-            count += 1
-    print(f"Successfully deleted {count} models from the database.")
-
-
 def get_sbml(query, sbml_path):
     id_list = get_ids(query)
     if not os.path.exists(sbml_path) or not os.path.isdir(sbml_path):
@@ -330,39 +292,16 @@ def get_sbml(query, sbml_path):
             continue
     print(f"Exported {count} of {total} models to {sbml_path}")
 
-def findMisProcessed(antimony):
-    lines = antimony.splitlines()
-    speciesList = []
-    for line in lines:
-        if line.startswith('var') or line.startswith('ext'):
-            if line not in speciesList:
-                speciesList.append(line)
-            else:
-                return True, antimony
-    return False, None
 
 
-def deleteBadModels(query, writeOut=False, destinationPath=None):
-    results = mm.query_database(query)
-    processed = 0
-    count = 0
-    if destinationPath:
-        os.chdir(destinationPath)
-    for model in results:
-        isMisProcessed, antimony = findMisProcessed(model['model'])
-        if isMisProcessed:
-            count += 1
-            mm.delete_by_query({'ID': model['ID']}, yesNo=False)
-        processed += 1
-        if writeOut:
-            with open(model['ID']+'.ant', "w") as f:
-                f.write(model['model'])
-                f.close()
-    print(f'Deleted {count} of {processed} models :(')
-
-def print_attributes():
-    # Print the attributes stored for each model
-    sample_model = collection.find_one({"num_nodes": 3})
+def print_schema(model=None):
+    # Print the schema for the database
+    # as you can see, this method is a bit flawed in that it assumes this sample_model will have the maximum
+    # number of schema
+    if model:
+        sample_model = collection.find_one({"ID": model["ID"]})
+    else:
+        sample_model = collection.find_one({"num_nodes": 3})
     for key in sample_model.keys():
         print(key)
 
@@ -372,6 +311,12 @@ def print_random_oscillator():
     print(result[i]["model"])
 
 
+def get_connection():
+    '''
+    Connect to the mongoDB
+    :return: a MongoClient object connected to the database
+    '''
+    return MongoClient("mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net")
 
 get_connection()
 
