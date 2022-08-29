@@ -36,7 +36,7 @@ def index():
 @app.route("/download", methods = ['GET', 'POST'])
 def download():
   if request.method == 'GET':
-      error = "No query data submitted. Please submit query data through the form page."
+      error = "No query submitted. Please submit a query from the home page."
       return render_template('error.html', error_msg=error)
 
   elif request.method == 'POST':
