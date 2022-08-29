@@ -22,10 +22,6 @@ app = Flask(__name__, static_folder = 'static')
 # mm.startup()
 
 
-#Config Values
-# app.config["DOWNLOAD_FOLDER"] = 'download'
-# app.config["ZIPF_NAME"] = "cesium-download" #default value to be changed
-
 
 #Index Page
 @app.route("/")
@@ -51,7 +47,6 @@ def download():
     model_type = form_data.get("mtype")
     num_nodes = form_data.get("num_nodes")
     num_reactions = form_data.get("num_reactions")
-    # oscillator = form_data.get("oscillator")
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
     telsimulatable = "isSimulatable" in form_data
@@ -66,15 +61,6 @@ def download():
     else:
       num_reactions = None
 
-
-    #CONVERTS HTML FORM VALUES TO BOOLEAN
-    # if oscillator == "osc_yes":
-    #   oscillator_status = True
-    # elif oscillator == "osc_no":
-    #   oscillator_status = False
-    # else:
-    #   # oscillator = "osc_no"
-    #   oscillator_status = False
 
     #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NONE
     if autocatalysis == "autocat_yes":
@@ -96,7 +82,6 @@ def download():
       'type' : model_type,
       'nodes' : num_nodes,
       'reac' : num_reactions,
-      # 'osc' : oscillator_status,
       'autocat' : autocatalysis_status,
       'degrade' : degradation_status,
       'simulatable' : telsimulatable
