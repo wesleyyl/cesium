@@ -94,7 +94,7 @@ def download():
     elif cesiumQueryExists(queryParam) == 0:
       error = "No models found. Please try a different query."
       return render_template('error.html', error_msg=error)
-    elif status == -1:
+    else:
       error = "Invalid inputs. Please try again."
       return render_template('error.html', error_msg=error)
 
