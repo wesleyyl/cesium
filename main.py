@@ -108,14 +108,19 @@ def download_file(query):
   query = json.loads(query)
 
   numOfModels = cesiumQueryExists(query)
-  randInt = random.randint(1000000, 9999999)
-  filename = "{}.zip".format("cesium-models-" + str(numOfModels) + "-" + str(randInt))
+
+  if numOfModels == 1:
+    filename = singleID(query)
+
+  else:
+    randInt = random.randint(1000000, 9999999)
+    filename = "{}.zip".format("cesium-models-" + str(numOfModels) + "-" + str(randInt))
 
   cesiumZip = cesiumQuery(query)
 
+  return send_file(cesiumZip, download_name=filename, as_attachment=True)
 
-
-  return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
+  # return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
 
 
 
@@ -182,10 +187,25 @@ def cesiumQuery(query):
   for key in list(dbquery.keys()):
     if dbquery[key] is None:
       del dbquery[key]
- 
   model_IDS = mm.get_ids(dbquery)
   
-  if model_IDS:
+
+  # Generate Single Text File
+  if len(model_IDS) == 1:
+    antStr = mm.get_antimony({ "ID" : model_IDS[0] })
+    # filename = str(model_IDS[0]) + ".txt"
+
+    if query["simulatable"]:
+      telStr = "import tellurium as te\n\nr = te.loada('''\n" + antStr + "\n''')\n\nm = r.simulate(0, 2, 400)\nr.plot()"
+      memTxtFile = BytesIO(bytes(telStr, encoding='utf-8'))
+    else:
+      memTxtFile = BytesIO(bytes(antStr, encoding='utf-8'))
+
+    memTxtFile.seek(0)
+    return memTxtFile
+
+  # Generate Zip File with all Text Files
+  elif model_IDS:
     memZipFile = BytesIO()
     with ZipFile(memZipFile, "w") as zipF:
       for ID in model_IDS:
@@ -196,12 +216,20 @@ def cesiumQuery(query):
           zipF.writestr(txtFilename, telStr)
         else:
           zipF.writestr(txtFilename, antStr)
-    memZipFile.seek(0)
 
+    memZipFile.seek(0)
     return memZipFile
 
   else:
     return None
+
+
+# Returns ID for queries with only one model
+def singleID(query):
+  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
+  model_IDS = mm.get_ids(dbquery)
+  filename = str(model_IDS[0]) + ".txt"
+  return filename
 
 
 
