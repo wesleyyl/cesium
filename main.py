@@ -44,47 +44,47 @@ def download():
     #Retrieve Form Data
     form_data = request.form #this is a dictionary w/ keys & values
 
-    model_type = form_data.get("mtype")
-    num_nodes = form_data.get("num_nodes")
-    num_reactions = form_data.get("num_reactions")
+    modelType = form_data.get("mtype")
+    numSpecies = form_data.get("numSpecies")
+    numReactions = form_data.get("numReactions")
     autocatalysis = form_data.get("autocat")
     degradation = form_data.get("degrade")
-    telsimulatable = "isSimulatable" in form_data
+    telSimulatable = "isSimulatable" in form_data
 
-    if num_nodes != "": #num_nodes is not None
-      num_nodes = int(num_nodes)
+    if numSpecies != "": #numSpecies is not None
+      numSpecies = int(numSpecies)
     else:
-      num_nodes = None
+      numSpecies = None
 
-    if num_reactions != "": #why doesn't it default to None if no values found?!
-      num_reactions = int(num_reactions)
+    if numReactions != "": #why doesn't it default to None if no values found?!
+      numReactions = int(numReactions)
     else:
-      num_reactions = None
+      numReactions = None
 
 
     #IF AUTOCATALYSIS LEFT EMPTY IT DEFAULTS TO NONE
     if autocatalysis == "autocat_yes":
-      autocatalysis_status = True
+      autocatalysis = True
     elif autocatalysis == "autocat_no":
-      autocatalysis_status = False
+      autocatalysis = False
     else:
-      autocatalysis_status = None
+      autocatalysis = None
 
     #IF DEGRADATION LEFT EMPTY IT DEFAULTS TO NONE
     if degradation == "degrade_yes":
-      degradation_status = True
+      degradation = True
     elif degradation == "degrade_no":
-      degradation_status = False
+      degradation = False
     else:
-      degradation_status = None
+      degradation = None
 
     queryParam = {
-      'type' : model_type,
-      'nodes' : num_nodes,
-      'reac' : num_reactions,
-      'autocat' : autocatalysis_status,
-      'degrade' : degradation_status,
-      'simulatable' : telsimulatable
+      'type' : modelType,
+      'species' : numSpecies,
+      'reac' : numReactions,
+      'autocat' : autocatalysis,
+      'degrade' : degradation,
+      'simulatable' : telSimulatable
     }
 
 
@@ -107,49 +107,20 @@ def download():
 def download_file(query):
   query = json.loads(query)
 
-  numOfModels = cesiumQueryExists(query)
+  numModels = cesiumQueryExists(query)
 
-  if numOfModels == 1:
+  if numModels == 1:
     filename = singleID(query)
 
   else:
     randInt = random.randint(1000000, 9999999)
-    filename = "{}.zip".format("cesium-models-" + str(numOfModels) + "-" + str(randInt))
+    filename = "{}.zip".format("cesium-models-" + str(numModels) + "-" + str(randInt))
 
   cesiumZip = cesiumQuery(query)
 
   return send_file(cesiumZip, download_name=filename, as_attachment=True)
 
   # return send_file(cesiumZip, attachment_filename=filename, as_attachment=True)
-
-
-
-  # try:
-
-    #Method 1
-    # with open(filepath, 'rb') as zipFile:
-    #   data = zipFile.readlines()
-    # os.remove(filepath)
-    # 
-    # return Response(data, headers={
-    #   'Content-Type': 'application/zip',
-    #   'Content-Disposition': 'attachment; filename=%s;' % app.config["ZIPF_NAME"]
-    #   })
-
-    #Method 2
-    # response = make_response(file.read())
-    # response.headers.set('Content-Type', 'zip')
-    # response.headers.set('Content-Disposition', 'attachment', filename='%s.zip' % app.config["ZIPF_NAME"])
-
-    # return response
-
-    #Method 3
-    # return Response(file, mimetype='application/zip', headers={'Content-Disposition': 'attachment;filename={}'.format(filename)})
-
-    #Method 4
-    # return send_file(cesiumZip, attachment_filename=app.config["ZIPF_NAME"], as_attachment=True)
-  # except FileNotFoundError:
-  #   abort(404)
 
 
 #About Page
@@ -167,7 +138,7 @@ def about():
 #Returns number of models in query if it exists. Otherwise it returns 0.
 def cesiumQueryExists(query):
 
-  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
+  dbquery = { "modelType" : query["type"], "numSpecies" : query["species"], "numReactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
 
   for key in list(dbquery.keys()):
     if dbquery[key] is None:
@@ -182,7 +153,7 @@ def cesiumQueryExists(query):
 
 def cesiumQuery(query):
 
-  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
+  dbquery = { "modelType" : query["type"], "numSpecies" : query["species"], "numReactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
 
   for key in list(dbquery.keys()):
     if dbquery[key] is None:
@@ -226,7 +197,7 @@ def cesiumQuery(query):
 
 # Returns ID for queries with only one model
 def singleID(query):
-  dbquery = { "modelType" : query["type"], "num_nodes" : query["nodes"], "num_reactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
+  dbquery = { "modelType" : query["type"], "numSpecies" : query["species"], "numReactions" : query["reac"], "Autcatalysis Present": query["autocat"], "Autodegradation Present": query["degrade"] }
   model_IDS = mm.get_ids(dbquery)
   filename = str(model_IDS[0]) + ".txt"
   return filename

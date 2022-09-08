@@ -11,30 +11,42 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # pwd:  VuRWQ
 astr = "mongodb+srv://data:VuRWQ@networks.wqx1t.mongodb.net"
 client = MongoClient(astr)
-database_names = client.list_database_names()
-db = client['networks']
-db = client.networks
-collection = db['networks']
+# print(client.list_database_names())
+
+db = client.models
+collection = db['models']
 cur = collection.find({})
+metadata = client.network_metadata
+md = metadata['network_metadata']
 
-'''
-CURRENT OPTIONS FOR modelType field:
-"oscillator"
-"random" - refers to random models used for controls
+def print_metadata():
+    '''
+    Print out stats about the 'models' database
+    :return: None
+    '''
+    r = query_metadata({})
+    entry = r[0]
+    print(f"Total Models: {entry['totalModels']}")
+    print(f"Total Oscillators: {entry['totalOscillators']}")
+    print(f"Total Random Models: {entry['totalRandom']}")
+    print(f"Model Types: {entry['modelTypes']}")
 
-You can update this list here or use the add_model_type function. 
-NOTE that this list is NOT attached to the database, so unless you push these changes, the database won't 'know'
-about this list and what types of models it has.
-'''
 
+def query_metadata(query):
+    '''
+    Query the metadata
+    :param query: dictionary - query
+    :return: pymongo cursor
+    '''
+    return md.find(query)
 def get_model_types():
     '''
     Get the current options for the modelType field
     :param printTypes: optional, boolean, prints the types if True
     :return: A list of possible model types (strings)
     '''
-    r = query_database({}, printSize=False)
-    return r[0]["allModelTypes"]
+    r = query_metadata({})
+    return r[0]["modelTypes"]
 
 def add_model_type(newType):
     '''
@@ -47,7 +59,7 @@ def add_model_type(newType):
         return
     allModelTypes.append(newType)
     try:
-        collection.update_many({}, {'$set': {'allModelTypes': allModelTypes}})
+        md.update_one({'name': 'metadata'}, {'$set': {'modelTypes': allModelTypes}})
         print("Successfully updated ")
     except:
         print("An error occurred. Model type not added.")
@@ -142,27 +154,24 @@ def add_model(antString, modelType, ID=None, num_nodes=None, num_reactions=None,
 def print_entries(cursor=cur, n=None):
     '''
     Prints entries in the database
-    :param n: optional, print out the first n entries. By default n is none and all entries are printed.
+    :param n: optional, print out the first n entries. By default, n is 30.
     :return: print out of every entry dictionary
     '''
     print(f"There are {cursor.count()} entries in the database")
     if not n:
-        for doc in cursor:
-            print(doc)
-    else:
-        count = 1
-        for doc in cursor:
-            print(doc)
-            if count < n:
-                count += 1
-            else:
-                break
+        n = 30
+
+    for i in range(n):
+        print(cursor[i])
 
 
-def get_random_oscillator():
-    result = query_database({'oscillator': True, 'num_nodes': 3})
-    count = collection.count_documents({'oscillator': True, 'num_nodes': 3})
-    return result[randrange(count)]
+def get_random_oscillator(printModel=False):
+    result = query_database({'modelType': 'oscillator', 'numSpecies': 3})
+    count = result.count()
+    model = result[randrange(count)]
+    if printModel:
+        print(model['antString'])
+    return model
 
 
 def get_nReactions(ant):
@@ -201,6 +210,8 @@ def query_database(query, returnLength=False, printSize=True):
     returnLength: boolean, also returns the number of results if True
     printSize: boolean, prints number of results if True
     :return: A cursor object containing the dictionaries for all matching models
+
+    To query nested dictionaries: x = db.networks.find({"reactionCounts.Total" : 6})
     '''
     length = collection.count_documents(query)
     if printSize:
@@ -250,7 +261,7 @@ def get_antimony(query):
     doc = collection.find(query)
     result = []
     for x in doc:
-        result.append(x['model'])
+        result.append(x['antString'])
     if len(result) == 0:
         print('No entries found.')
     elif len(result) == 1:
@@ -301,12 +312,12 @@ def print_schema(model=None):
     if model:
         sample_model = collection.find_one({"ID": model["ID"]})
     else:
-        sample_model = collection.find_one({"num_nodes": 3})
+        sample_model = collection.find_one({"numSpecies": 3, "isEvolved": True})
     for key in sample_model.keys():
         print(key)
 
 def print_random_oscillator():
-    result = query_database({"num_nodes":3, "oscillator": True})
+    result = query_database({"numSpecies":3, "modelType": "oscillator"})
     i = randrange(0, result.count())
     print(result[i]["model"])
 
