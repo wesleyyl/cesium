@@ -5,6 +5,7 @@ from random import randrange
 import tellurium as te
 from random import randint
 
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # user: data
@@ -48,21 +49,6 @@ def get_model_types():
     r = query_metadata({})
     return r[0]["modelTypes"]
 
-def add_model_type(newType):
-    '''
-    Add a new option for the modelType field
-    :param newType: name of new type (string)
-    '''
-    allModelTypes = get_model_types()
-    if newType in allModelTypes:
-        print("This modelType already exists.")
-        return
-    allModelTypes.append(newType)
-    try:
-        md.update_one({'name': 'metadata'}, {'$set': {'modelTypes': allModelTypes}})
-        print("Successfully updated ")
-    except:
-        print("An error occurred. Model type not added.")
 
 def generate_ID(n=19):
     '''
@@ -102,7 +88,7 @@ def is_valid_ant_string(antString):
     return True
 
 
-def add_model(antString, modelType, ID=None, num_nodes=None, num_reactions=None, addReactionProbabilites=None,
+def add_model(antString, modelType, ID=None, numSpecies=None, numReactions=None, addReactionProbabilites=None,
               initialProbabilites=None, autocatalysisPresent=None, degradationPresent=None):
     '''
     Add a single new model to the database
@@ -110,8 +96,8 @@ def add_model(antString, modelType, ID=None, num_nodes=None, num_reactions=None,
     :param modelType: (str) what type of model it is, eg. "oscillator"
     Optional args:
     :param ID: (str) model's ID
-    :param num_nodes: (int) the number of species
-    :param num_reactions: (int) the number of reactions
+    :param numSpecies: (int) the number of species
+    :param numReactions: (int) the number of reactions
     :param addReactionProbabilites: int list, the probability of adding each reaction type:
         uni-uni, uni-bi, bi-uni, bi-bi
     :param initialProbabilites: int list, the initial probability of adding each reaction type when generating a
@@ -130,15 +116,15 @@ def add_model(antString, modelType, ID=None, num_nodes=None, num_reactions=None,
         raise Exception(f"Unable to add model. A model with the ID {ID} already exists.\n")
     if not ID:
         ID = generate_ID()
-    if not num_nodes:
-        num_nodes = get_nNodes(antString)
-    if not num_reactions:
-        num_reactions = get_nReactions(antString)
+    if not numSpecies:
+        numSpecies = get_nSpecies(antString)
+    if not numReactions:
+        numReactions = get_nReactions(antString)
     modelDict = {'ID': ID,
                  'modelType': modelType,
-                 'num_nodes': num_nodes,
-                 'num_reactions': num_reactions,
-                 'model': antString,
+                 'numSpecies': numSpecies,
+                 'numReactions': numReactions,
+                 'antString': antString,
                  'addReactionProbabilities': addReactionProbabilites,
                  'initialProbabilities': initialProbabilites,
                  'Autocatalysis Present': autocatalysisPresent,
@@ -190,7 +176,7 @@ def get_nReactions(ant):
     return nReactions
 
 
-def get_nNodes(ant):
+def get_nSpecies(ant):
     nNodes = 0
     # Skip the first line if it is a comment
     if ant[0].startswith('#'):
@@ -262,6 +248,10 @@ def get_antimony(query):
     result = []
     for x in doc:
         result.append(x['antString'])
+        # try:
+        #     result.append(x['antString'])
+        # except:
+        #     print(x)
     if len(result) == 0:
         print('No entries found.')
     elif len(result) == 1:
@@ -319,7 +309,7 @@ def print_schema(model=None):
 def print_random_oscillator():
     result = query_database({"numSpecies":3, "modelType": "oscillator"})
     i = randrange(0, result.count())
-    print(result[i]["model"])
+    print(result[i]["antString"])
 
 
 def get_connection():

@@ -1,0 +1,167 @@
+<!-- Info -->
+{% extends "base.html" %}
+{% set active_page = "index" %}
+{% block title %}Cesium Database Home{% endblock %}
+
+{% block content %}
+
+
+<!-- FULL SIZED EDGE TO EDGE JUMBOTRON (old) -->
+
+<!-- <section class="bg-light container-fluid">
+    <div class="row" id="jumbotron">
+    	<div class="col d-flex justify-content-center">
+			<div class="jumbotron jumbotron-fluid">
+		  		<h1 class="display-4">Cesium Database</h1>
+		  		<p class="lead">A database of over 2000 evolved reaction networks.</p>
+		  		<hr class="my-4">
+				<p>Sauro Lab</p>
+		  		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
+			</div>
+		</div>
+	</div>
+</section> -->
+
+
+<div class="container-fluid">
+	<div class="jumbotron jumbotron-fluid" id="jumbotron">
+		<h1 class="display-4">Cesium Database</h1>
+		<!-- <p class="lead">A database of over 2000 evolved reaction networks.</p> -->
+		<hr class="my-4">
+		<!-- <p>Sauro Lab</p> -->
+		<a class="btn btn-primary btn-lg" href="{{ url_for('about') }}" role="button">Learn more</a>
+	</div>
+</div>
+
+
+
+
+<div class="py-5 container">
+	<h2 class="text-center">Reaction Network Model Query</h2>
+	<div class="pt-4 container-fluid d-flex justify-content-center">
+		<form action="/download" method="POST" novalidate>
+
+
+			<div class="row mb-4 justify-content-center">
+				<label for="type" class="col-sm-4 col-form-label text-danger">Model Type</label>
+				<div class="col-auto">
+					<select class="form-select" id="mtype" name="mtype" aria-label="Default select example" autocomplete="off" placeholder="Please select" required>
+						<option selected>Please select</option>
+						<!-- <option value="oscillator">{{ types[0] }}</option> -->
+						<!-- <option value="oscillator">Oscillator</option>
+						<option value="linear">Linear Chain</option>
+						<option value="random">Random</option> -->
+					</select>
+					
+				</div>
+			</div>
+
+			<div class="row mb-4 justify-content-center">
+				<label for="numSpecies" class="col-sm-4 col-form-label">Number of Species</label>
+				<div class="col-5">
+					<input type="number" class="form-control" id="numSpecies" name="numSpecies" aria-describedby="numSpeciesDesc" placeholder="#" autocomplete="off">
+			    	<!-- <div id="numNodesDesc" class="form-text">The number of species.</div> -->
+				</div>
+
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+					<label class="form-check-label" for="inlineCheckbox1">></label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+					<label class="form-check-label" for="inlineCheckbox2"><</label>
+				</div>
+			</div>
+
+
+
+			<div class="row mb-4 justify-content-center">
+				<label for="numReactions" class="col-sm-4 col-form-label">Number of Reactions</label>
+				<div class="col-5">
+					<input type="number" class="form-control" id="numReactions" name="numReactions" aria-describedby="numReactionsDesc" placeholder="#" autocomplete="off">
+			    	<!-- <div id="numReactionsDesc" class="form-text">The number of reactions.</div> -->
+				</div>
+			</div>
+
+
+			<div class="row mb-4 justify-content-center">
+				<label for="autocatalysis" class="col-sm-4 col-form-label">Include Autocatalysis Steps?</label>
+				<div class="col-auto">
+					<select class="form-select" id="autocat" name="autocat" aria-label="Default select example" autocomplete="off" placeholder="Please select">
+						<option selected>Please select</option>
+						<option value="autocat_yes">Yes</option>
+						<option value="autocat_no">No</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="row mb-4 justify-content-center">
+				<label for="degradation" class="col-sm-4 col-form-label">Include Degradation Steps?</label>
+				<div class="col-auto">
+					<select class="form-select" id="degrade" name="degrade" aria-label="Default select example" autocomplete="off" placeholder="Please select">
+						<option selected>Please select</option>
+						<option value="degrade_yes">Yes</option>
+						<option value="degrade_no">No</option>
+					</select>
+				</div>
+			</div>
+
+
+			<div class="row mb-4 justify-content-center">
+				<div class="col-auto">
+					<div class="form-check">
+				  		<input class="form-check-input" type="checkbox" value="" name="isSimulatable" id="flexCheckDefault">
+				 		<label class="form-check-label" for="flexCheckDefault">
+				    		Simulatable Tellurium form
+				  		</label>
+					</div>
+				</div>
+			</div>
+
+			
+
+			<div class="row mt-5 justify-content-center">
+				<div class="col-sm-10 text-center">
+					<button type="submit" class="btn btn-primary">Download File</button>
+				</div>
+			</div>
+
+
+		</form>
+	</div>
+</div>
+
+
+<div class="container mt-5" id="querynotes">
+	<article class="notes">
+		<h2 class="notes-title text-center pb-3">Notes About Making a Query</h2>
+		<ul class="lh-lg">
+			<li>The only required field is model type. All other fields can be left empty.</li>
+			<li>Selecting the simulatable Tellurium form includes syntax in each text file to allow its contents to be automatically run in Tellurium. By default, the Tellurium code included simulates the model from 0 to 2 with 400 steps [r.simulate(0, 2, 400)].</li>
+			<!-- <li>Desc. of conditional inputs</li> -->
+		</ul>
+	</article>
+</div>
+
+				
+
+
+
+<!-- Javascript makes model type drop-down dynamic based on model types that exist in Cesium DB -->
+<script>
+	// document.getElementById("test").innerHTML = {{ types | tojson }};
+	var mtype = document.getElementById("mtype"),
+		arr = {{ types | tojson }};
+		// arr = ["hello", "bye"];
+
+	for(var i = 0; i < arr.length; i++) {
+		var option = document.createElement("OPTION"),
+			txt = document.createTextNode(arr[i]);
+		option.appendChild(txt);
+		option.setAttribute("value",arr[i]);
+		mtype.insertBefore(option,mtype.lastChild);
+	}
+</script>
+
+
+{% endblock %}

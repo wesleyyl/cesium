@@ -29,6 +29,9 @@ def index():
     types = mm.get_model_types()
     return render_template('index.html', types=types)
 
+    # return render_template('index_relationalop.html', types=types)
+
+
 #Download Transition Page
 # 
 # This route will take form data and convert parameters into a query dictionary.
